@@ -1,4 +1,4 @@
-import { getAllGoals } from "@/app/lib/data";
+import { getAllGoals } from "@/app/lib/actions";
 
 
 export default async function Goals(){

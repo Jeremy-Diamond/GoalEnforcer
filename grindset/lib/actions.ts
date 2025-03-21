@@ -1,25 +1,14 @@
 'use server';
-import { z } from "zod";
-import clientPromise from "./mongodb";
+import { Goal}  from "../models/Goal";
+import dbConnect from "./mongodb";
 
-
-const goalFormSchema = z.object({
-    id: z.string().optional(),
-    title: z.string().min(3).max(100),
-    description: z.string().min(1).max(500),
-});
-
-const CreateGoal = goalFormSchema.omit({ id: true });
 
 export async function createGoal(formData: FormData) {
     try {
         const data = Object.fromEntries(formData.entries());
-        const validatedData = CreateGoal.parse(data);
-        console.log("Validated Data:", validatedData);
-        const MongoClient = await clientPromise;
-        const db = MongoClient.db(process.env.MONGODB_DB);
-        const collection = db.collection('goals');
-        const result = await collection.insertOne(validatedData);
+        console.log("Validated Data:", data);
+        dbConnect();
+        const result = await Goal.insertOne(data);
         return {
             acknowledged: result.acknowledged,
             insertedId: result.insertedId.toString(),
@@ -29,3 +18,15 @@ export async function createGoal(formData: FormData) {
         return null;
     }
 }
+
+export async function getAllGoals() {
+    try {
+        await dbConnect();
+        const goals = await Goal.find({}).exec();
+        return goals;
+    } catch (error) {
+        console.error("An error occurred while getting all goals", error);
+        return [];
+    }
+}
+
