@@ -1,9 +1,10 @@
-import { getAllGoals } from "@/app/lib/actions";
+import { getCurrentUserGoals } from "@/app/lib/actions";
+
 
 
 export default async function Goals(){
 
-    const goals = await getAllGoals();
+    const goals = await getCurrentUserGoals();
     console.log("Found Goals:",goals);
     return(
         <div>
