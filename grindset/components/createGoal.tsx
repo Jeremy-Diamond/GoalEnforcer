@@ -2,8 +2,12 @@
 
 import { useState } from 'react';
 import { createGoal } from '../lib/actions';
+import { useUser } from '@clerk/nextjs'
+
+
 
 export default function CreateGoal() {
+  const user = useUser();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
 
@@ -18,11 +22,15 @@ export default function CreateGoal() {
 
   async function handleSubmit(event: React.FormEvent<GoalFormElement>) {
     event.preventDefault();
-    console.log("Form submitted with title:", title, "and description:", description);
+    //console.log("Form submitted with title:", title, "and description:", description);
     const formData = new FormData();
     formData.append('title', title);
     formData.append('description', description);
-    await createGoal(formData);
+    formData.append('userId', user.user?.id || '');
+    formData.append('startDate', new Date().toISOString());
+    formData.append('endDate', new Date().toISOString());
+    formData.append('completed', 'false');
+    createGoal(formData);
   }
 
   return (

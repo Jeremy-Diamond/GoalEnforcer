@@ -12,13 +12,14 @@ const TaskSchema = new mongoose.Schema({
 });
 
 const GoalSchema = new mongoose.Schema({
+    userId: { type: String, required: true },
     title: { type: String, required: true },
     description: { type: String },
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
     completed: { type: Boolean, required: true },
     tasks: { type: [TaskSchema], default: [] }
-  });
+  },{versionKey: false});
 
    
 export const Goal = models.Goal || model("Goal", GoalSchema);
