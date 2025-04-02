@@ -30,3 +30,16 @@ export async function getCurrentUserGoals() {
     }
 }
 
+// get goal by id
+
+export async function getGoalById(id: string) {
+    try {
+        await dbConnect();
+        const goal = await Goal.findById(id).exec();
+        return goal;
+    } catch (error) {
+        console.error("An error occurred while getting the goal", error);
+        return null;
+    }
+}
+

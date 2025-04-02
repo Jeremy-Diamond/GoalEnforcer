@@ -1,4 +1,5 @@
 // import { Subtasks } from "../../../components/goals/subtasks";
+import { getGoalById  } from "@/app/lib/actions";
 import { GoalDetails } from "../../../components/goals/GoalDetails";
 import { GoalPreferences } from "../../../components/goals/GoalPreferences";
 import {
@@ -8,6 +9,7 @@ import {
   TabsTrigger,
 } from "../../../components/ui/Tabs";
 
+/*
 const mockGoal = {
   id: "1",
   title: "Complete Website Redesign",
@@ -61,10 +63,16 @@ const mockGoal = {
     collaborators: [],
   },
 };
+*/
 
-export default function GoalPage({ params }: { params: { id: string } }) {
-  const goalId = params.id;
-  const goal = mockGoal; // I have to replace this with actual data fetching logic to fetch from the database
+export default async function GoalPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const resolvedParams = await params; // Resolve the Promise
+  const goalId = resolvedParams.id; // Access the resolved `id`
+  const goal = await getGoalById(goalId);
 
   return (
     <div className="flex min-h-screen flex-col">
