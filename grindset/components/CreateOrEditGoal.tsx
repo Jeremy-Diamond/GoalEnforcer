@@ -108,14 +108,6 @@ export default function CreateOrEditGoal({ goal, mode }: CreateGoalProps) {
     setNewTaskTitle(''); // Clear the input field
   };
 
-  /*
-  const addTask = () => {
-    if (newTaskTitle.trim() === '') return; // Prevent adding empty tasks
-    setTasks([...tasks, { taskTitle: newTaskTitle, completed: false }]);
-    setNewTaskTitle(''); // Clear the input field
-  };
-  */
-
   const removeTask = (index: number) => {
     setTasks(tasks.filter((_, i) => i !== index));
   };
@@ -291,10 +283,10 @@ export default function CreateOrEditGoal({ goal, mode }: CreateGoalProps) {
             className="w-full p-2 text-white rounded-md border border-gray-600"
             aria-label="Select reminder frequency"
           >
-            <option value="">Select frequency</option>
-            <option value="daily">Daily</option>
-            <option value="weekly">Weekly</option>
-            <option value="monthly">Monthly</option>
+            <option className= "text-black" value="">Select frequency</option>
+            <option className= "text-black" value="daily">Daily</option>
+            <option className= "text-black" value="weekly">Weekly</option>
+            <option className= "text-black" value="monthly">Monthly</option>
           </select>
         </div>
 
