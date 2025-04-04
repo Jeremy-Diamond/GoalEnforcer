@@ -1,4 +1,5 @@
 // import { Subtasks } from "../../../components/goals/subtasks";
+import { getGoalById  } from "@/app/lib/actions";
 import { GoalDetails } from "../../../components/goals/GoalDetails";
 import { GoalPreferences } from "../../../components/goals/GoalPreferences";
 import {
@@ -7,68 +8,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "../../../components/ui/Tabs";
-
 import { notFound } from "next/navigation";
-
-const mockGoal = {
-  id: "1",
-  title: "Complete Website Redesign",
-  description:
-    "Finish the new website design and get client approval. This includes updating the homepage, product pages, and checkout flow to improve user experience and conversion rates.",
-  startDate: "2025-03-15T00:00:00.000Z",
-  endDate: "2025-04-15T00:00:00.000Z",
-  progress: 65,
-  tasks: [
-    {
-      id: "1-1",
-      taskTitle: "Create wireframes",
-      completed: true,
-    },
-    {
-      id: "1-2",
-      taskTitle: "Design homepage mockup",
-      completed: true,
-    },
-    {
-      id: "1-3",
-      taskTitle: "Design product page templates",
-      completed: true,
-    },
-    {
-      id: "1-4",
-      taskTitle: "Design checkout flow",
-      completed: false,
-    },
-    {
-      id: "1-5",
-      taskTitle: "Get client feedback",
-      completed: false,
-    },
-    {
-      id: "1-6",
-      taskTitle: "Implement revisions",
-      completed: false,
-    },
-    {
-      id: "1-7",
-      taskTitle: "Final client approval",
-      completed: false,
-    },
-  ],
-  preferences: {
-    emailReminders: true,
-    reminderFrequency: "daily",
-    deadlineTime: "18:00",
-    allowCollaboration: false,
-    collaborators: [],
-  },
-};
-
-type GoalPageProps = {
-  params: Promise<{
-    id: string;
-  }>;
-};
 
 export default async function GoalPage(props: GoalPageProps) {
   const params = await props.params;
