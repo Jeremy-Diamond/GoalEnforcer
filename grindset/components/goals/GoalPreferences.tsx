@@ -35,13 +35,11 @@ interface GoalPreferencesProps {
 }
 
 export function GoalPreferences({
-  goalId,
   preferences: initialPreferences,
   disabled = false,
 }: GoalPreferencesProps) {
   const [preferences, setPreferences] =
     useState<Preferences>(initialPreferences);
-  const [newCollaborator, setNewCollaborator] = useState("");
 
   const handleSwitchChange = (name: keyof Preferences, checked: boolean) => {
     setPreferences({ ...preferences, [name]: checked });

@@ -8,6 +8,8 @@ import {
   TabsTrigger,
 } from "../../../components/ui/Tabs";
 
+import { notFound } from "next/navigation";
+
 const mockGoal = {
   id: "1",
   title: "Complete Website Redesign",
@@ -62,8 +64,15 @@ const mockGoal = {
   },
 };
 
-export default async function GoalPage({ params }: { params: { id: string } }) {
-  const { id } = await params;
+type GoalPageProps = {
+  params: {
+    id: string;
+  };
+};
+
+export default async function GoalPage({ params }: GoalPageProps) {
+  if (!params?.id) return notFound();
+  const { id } = params;
   const goal = mockGoal; // I have to replace this with actual data fetching logic to fetch from the database
   return (
     <div className="flex min-h-screen flex-col">
