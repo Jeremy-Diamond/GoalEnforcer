@@ -62,10 +62,9 @@ const mockGoal = {
   },
 };
 
-export default function GoalPage({ params }: { params: { id: string } }) {
-  const goalId = params.id;
+export default async function GoalPage({ params }: { params: { id: string } }) {
+  const { id } = await params;
   const goal = mockGoal; // I have to replace this with actual data fetching logic to fetch from the database
-
   return (
     <div className="flex min-h-screen flex-col">
       <main className="flex-1 p-4 md:p-6 lg:p-8">
@@ -81,7 +80,11 @@ export default function GoalPage({ params }: { params: { id: string } }) {
               {/* <Subtasks goalId={goalId} tasks={goal.tasks} /> */}
             </TabsContent>
             <TabsContent value="preferences" className="mt-6">
-              <GoalPreferences goalId={goalId} preferences={goal.preferences} />
+              <GoalPreferences
+                goalId={id}
+                preferences={goal.preferences}
+                disabled={true}
+              />
             </TabsContent>
           </Tabs>
         </div>
