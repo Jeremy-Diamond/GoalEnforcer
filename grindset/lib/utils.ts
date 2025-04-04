@@ -14,3 +14,10 @@ export function formatDate(date: Date, includeTime = false): string {
 
   return date.toLocaleString("en-US", options);
 }
+
+export function formatTimeToInput(timeString?: string): string {
+  if (!timeString) return '';
+  const [hours, minutes] = timeString.split(':');
+  const formattedHours = hours.padStart(2, '0'); // Add leading zero if needed
+  return `${formattedHours}:${minutes}`;
+}

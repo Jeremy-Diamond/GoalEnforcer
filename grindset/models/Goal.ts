@@ -1,14 +1,15 @@
 import mongoose from "mongoose";
 const {models,model} = mongoose;
 
-const TaskDateSchema = new mongoose.Schema({
-    date: { type: Date, required: true },
+const dailyCompletion = new mongoose.Schema({
+    dayCount: { type: Number},
+    dueDate: { type: Date},
     completed: { type: Boolean, default: false }
   });
 
 const TaskSchema = new mongoose.Schema({
   taskTitle: { type: String, required: true },
-  dates: { type: [TaskDateSchema], default: [] }
+  dailyCompletion: { type: [dailyCompletion], default: [] }
 });
 
 const GoalSchema = new mongoose.Schema({
@@ -18,6 +19,9 @@ const GoalSchema = new mongoose.Schema({
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
     completed: { type: Boolean, required: true },
+    allowCollaboration: { type: Boolean, default: false },
+    dailyDeadlineTime: { type: String, default: '' },
+    reminderFrequency: { type: String, enum: ['daily', 'weekly', 'monthly'], default: '' },
     tasks: { type: [TaskSchema], default: [] }
   },{versionKey: false});
 

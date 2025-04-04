@@ -10,6 +10,7 @@ import {
 } from "../../../components/ui/Tabs";
 import { notFound } from "next/navigation";
 
+
 export default async function GoalPage(props: GoalPageProps) {
   const params = await props.params;
   if (!params?.id) return notFound();

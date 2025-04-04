@@ -1,8 +1,8 @@
-import CreateGoal from "@/app/components/createGoal";
+import CreateOrEditGoal from "@/app/components/CreateOrEditGoal";
 
 
 export default function Goals(){
     return(
- <CreateGoal />
+        <CreateOrEditGoal mode= "create" />
     );
 }
