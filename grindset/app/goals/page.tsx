@@ -1,15 +1,20 @@
 import { GoalDetails } from "@/app/components/goals/GoalDetails";
 import { getCurrentUserGoals } from "@/app/lib/actions";
+import Link from "next/link";
 
 export default async function Goals() {
   const goals = await getCurrentUserGoals();
   console.log("Found Goals:", goals);
   return (
-    <div>
-      <h1>All Goals</h1>
+    <div className="flex flex-col items-center justify-start gap-5 mx-2 min-h-screen">
+      <h1 className="text-3xl font-semibold leading-none tracking-tight text-[#FFFFFF]">
+        All Goals
+      </h1>
       <ul>
         {goals.map((goal) => (
-          <GoalDetails goal={goal} key={goal.id} />
+          <Link href={`/goals/${goal.id}`} key={goal.id}>
+            <GoalDetails goal={goal} />
+          </Link>
         ))}
       </ul>
     </div>
