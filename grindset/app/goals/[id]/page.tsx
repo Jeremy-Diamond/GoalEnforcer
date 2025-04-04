@@ -8,14 +8,17 @@ import {
   TabsList,
   TabsTrigger,
 } from "../../../components/ui/Tabs";
-import { notFound } from "next/navigation";
+//import { notFound } from "next/navigation";
 
+export default async function GoalPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const resolvedParams = await params; // Resolve the Promise
+  const goalId = resolvedParams.id; // Access the resolved `id`
+  const goal = await getGoalById(goalId);
 
-export default async function GoalPage(props: GoalPageProps) {
-  const params = await props.params;
-  if (!params?.id) return notFound();
-  const { id } = params;
-  const goal = mockGoal; // I have to replace this with actual data fetching logic to fetch from the database
   return (
     <div className="flex min-h-screen flex-col">
       <main className="flex-1 p-4 md:p-6 lg:p-8">
@@ -32,7 +35,7 @@ export default async function GoalPage(props: GoalPageProps) {
             </TabsContent>
             <TabsContent value="preferences" className="mt-6">
               <GoalPreferences
-                goalId={id}
+                goalId={goalId}
                 preferences={goal.preferences}
                 disabled={true}
               />
