@@ -65,12 +65,13 @@ const mockGoal = {
 };
 
 type GoalPageProps = {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 };
 
-export default async function GoalPage({ params }: GoalPageProps) {
+export default async function GoalPage(props: GoalPageProps) {
+  const params = await props.params;
   if (!params?.id) return notFound();
   const { id } = params;
   const goal = mockGoal; // I have to replace this with actual data fetching logic to fetch from the database
