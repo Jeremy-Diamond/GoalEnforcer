@@ -1,7 +1,7 @@
 import CreateOrEditGoal from "@/app/components/CreateOrEditGoal";
 import { getGoalById } from "@/app/lib/actions";
 
-export default async function EditGoalPage({ params }: { params: { id: string } }) {
+export default async function EditGoalPage({ params }: { params: Promise<{ id: string }>}) {
     const resolvedParams = await params; // Resolve the Promise
     const goalId = resolvedParams.id; // Access the resolved `id`
     //console.log("Resolved Params:", resolvedParams);
