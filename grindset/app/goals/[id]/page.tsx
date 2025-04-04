@@ -73,6 +73,7 @@ export default async function GoalPage({
   const resolvedParams = await params; // Resolve the Promise
   const goalId = resolvedParams.id; // Access the resolved `id`
   const goal = await getGoalById(goalId);
+  console.log("Goal:", goal);
 
   return (
     <div className="flex min-h-screen flex-col">

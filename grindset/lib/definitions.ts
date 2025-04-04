@@ -5,5 +5,8 @@ export type Goal = {
   startDate: string;
   endDate: string;
   completed: boolean;
+  allowCollaboration: boolean;
+  dailyDeadlineTime: string;
+  reminderFrequency: string;
   //tasks: Task[];
 };
