@@ -43,16 +43,14 @@ export function GoalDetails({ goal }: GoalDetailsProps) {
   const daysRemaining = getDaysRemaining(goal.endDate);
 
   // Calculate completion percentage based on completed tasks
-  const completedTasks = goal.tasks.filter((task) => task.completed).length;
+  let completedTasks = 0;
+
   const totalTasks = goal.tasks.length;
 
   const calculateCompletion = (tasks: Task[]): number => {
-    let completedTasks = 0;
-    let totalTasks = 0;
-
     tasks.forEach((task) => {
       task.dailyCompletion.forEach((daily: DailyCompletion) => {
-        totalTasks += 1;
+        console.log("DAILY", daily);
         if (daily.completed) {
           completedTasks += 1;
         }
