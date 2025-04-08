@@ -150,7 +150,7 @@ type DailyCompletion = {
 
 export async function getDailyCompletionId(goalId: string, taskId: string, taskdate: Date){
   
-  let taskdateDay = taskdate.getDate();
+  const taskdateDay = taskdate.getDate();
   try {
     await dbConnect();
 

@@ -1,11 +1,26 @@
-import { getDailyCompletionId, getGoalById } from "@/app/lib/actions";
+import { getGoalById } from "@/app/lib/actions";
 import Checklist from "./Checklist";
+
 
 
 type DailyChecklistProps = {
     gid: string;
     ddate:string;
 }
+
+interface DailyCompletion {
+    _id: string;
+    completed: boolean;
+    dueDate: Date;
+  }
+  
+  interface Task {
+    _id: string;
+    taskTitle: string;
+    dailyCompletion: DailyCompletion[];
+  }
+  
+
 
 export default async function DailyChecklist ({gid, ddate}:DailyChecklistProps) {
     
@@ -21,9 +36,9 @@ export default async function DailyChecklist ({gid, ddate}:DailyChecklistProps) 
         <div className="border border-1 rounded-md p-4">
             <h2 className="font-bold text-lg">{gtitle}</h2>
     
-            {tasklist.map((task: any) => {
+            {tasklist.map((task: Task) => {
                 //console.log("Task:", task);
-                const dc = task.dailyCompletion.find((entry: any) => {
+                const dc = task.dailyCompletion.find((entry: DailyCompletion) => {
                     //const entryDate = new Date(entry.dueDate).toDateString();
                     //console.log(entryDate);
                     //console.log((entry.dueDate).toDateString());
@@ -35,8 +50,8 @@ export default async function DailyChecklist ({gid, ddate}:DailyChecklistProps) 
             });
     
             //const dcId = dc && dc._id ? String(dc._id) : null ;
-            const dcId = dc?._id?.toString() ?? null;
-            const isChecked = dc?.completed;
+            const dcId = dc?._id?.toString() ?? "";
+            const isChecked = dc?.completed ?? false;
             const taskId = String(task._id);
             //console.log(dcId);
             //console.log(isChecked);

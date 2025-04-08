@@ -30,6 +30,7 @@ export default function Checklist ({goalId, taskId, dcId, checked, tTitle}:Check
     //console.log("ischecked " + isChecked);
     return (
         <div className="flex">
+            {isPending && <p>Updating...</p>}
             <input 
                 type="checkbox"  
                 className="mr-4"

@@ -5,9 +5,27 @@ type DContainerProps = {
     gdate?:string;
 }
 
+interface DailyCompletion {
+    _id: string;
+    completed: boolean;
+    dueDate: Date;
+}
+
+interface Task {
+    _id: string;
+    taskTitle: string;
+    dailyCompletion: DailyCompletion[];
+}
+
+interface Goal {
+    _id: string;
+    title: string;
+    tasks: Task[];
+}
+
 export default async function DContainer ({gdate = new Date().toString()}: DContainerProps) {
-    let todayDate = new Date();
-    let viewthedate = new Date(gdate);
+    const todayDate = new Date();
+    const viewthedate = new Date(gdate);
     const goal = await getCurrentUserGoals();
 
     //console.log("Goals retrieved:", goal); 
@@ -31,7 +49,7 @@ export default async function DContainer ({gdate = new Date().toString()}: DCont
 
                 {/* goal task lists */}
                 <div className="md:flex">
-                    {goal.map((goal:any) => {
+                    {goal.map((goal:Goal) => {
                         //console.log("goal data: ", goal);
                         //console.log("goal id:", goal._id.toString());
                         //console.log("gdate", gdate);

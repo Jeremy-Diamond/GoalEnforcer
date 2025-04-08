@@ -27,3 +27,5 @@ const GoalSchema = new mongoose.Schema({
 
    
 export const Goal = models.Goal || model("Goal", GoalSchema);
+export const Task = models.Task || model("Task", TaskSchema);
+export const DailyCompletion = models.Daily || model("Daily", dailyCompletion);
