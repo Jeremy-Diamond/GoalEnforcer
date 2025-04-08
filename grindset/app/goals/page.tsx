@@ -1,4 +1,6 @@
 import { GoalDetails } from "@/app/components/goals/GoalDetails";
+import DContainer from "@/app/components/tasks/DContainer";
+//import DContainer from "@/app/components/tasks/DContainer";
 import { getCurrentUserGoals } from "@/app/lib/actions";
 import Link from "next/link";
 
@@ -17,6 +19,7 @@ export default async function Goals() {
           </Link>
         ))}
       </ul>
+      <DContainer />
     </div>
   );
 }
