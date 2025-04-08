@@ -46,7 +46,7 @@ export function GoalDetails({ goal }: GoalDetailsProps) {
   const completedTasks = goal.tasks.filter((task) => task.completed).length;
   const totalTasks = goal.tasks.length;
 
-  const calculateCompletion = (tasks: any[]): number => {
+  const calculateCompletion = (tasks: Task[]): number => {
     let completedTasks = 0;
     let totalTasks = 0;
 
