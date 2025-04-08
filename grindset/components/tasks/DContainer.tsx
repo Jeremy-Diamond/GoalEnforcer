@@ -1,6 +1,5 @@
 import { getCurrentUserGoals } from "@/app/lib/actions";
 import DailyChecklist from "./DailyChecklist";
-import { Button } from "../ui/Button";
 
 type DContainerProps = {
     gdate?:Date;
