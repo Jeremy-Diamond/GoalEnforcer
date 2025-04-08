@@ -1,5 +1,5 @@
 // import { Subtasks } from "../../../components/goals/subtasks";
-import { getGoalById  } from "@/app/lib/actions";
+import { getGoalById } from "@/app/lib/actions";
 import { GoalDetails } from "../../../components/goals/GoalDetails";
 import { GoalPreferences } from "../../../components/goals/GoalPreferences";
 import {
@@ -18,6 +18,12 @@ export default async function GoalPage({
   const resolvedParams = await params; // Resolve the Promise
   const goalId = resolvedParams.id; // Access the resolved `id`
   const goal = await getGoalById(goalId);
+  goal.preferences = {
+    emailReminders: true,
+    allowCollaboration: goal.allowCollaboration,
+    reminderFrequency: goal.reminderFrequency,
+    deadlineTime: goal.deadlineTime,
+  };
 
   return (
     <div className="flex min-h-screen flex-col">

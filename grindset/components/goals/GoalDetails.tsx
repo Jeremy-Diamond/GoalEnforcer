@@ -1,15 +1,18 @@
 import { formatDate } from "@/app/lib/utils";
-import { Calendar, Clock, Edit, Target } from "lucide-react";
-import Link from "next/link";
+import { Calendar, Clock, Target } from "lucide-react";
 
-import { Button } from "../../components/ui/Button";
 import { Card, CardContent } from "../../components/ui/Card";
 import { Progress } from "../../components/ui/Progress";
+import EditGoalButton from "./EditGoalButton";
+interface DailyCompletion {
+  completed: boolean;
+}
 
 interface Task {
   id: string;
   taskTitle: string;
   completed: boolean;
+  dailyCompletion: DailyCompletion[];
 }
 
 interface Goal {
@@ -42,8 +45,24 @@ export function GoalDetails({ goal }: GoalDetailsProps) {
   // Calculate completion percentage based on completed tasks
   const completedTasks = goal.tasks.filter((task) => task.completed).length;
   const totalTasks = goal.tasks.length;
-  const completionPercentage =
-    totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+  const calculateCompletion = (tasks: any[]): number => {
+    let completedTasks = 0;
+    let totalTasks = 0;
+
+    tasks.forEach((task) => {
+      task.dailyCompletion.forEach((daily: DailyCompletion) => {
+        totalTasks += 1;
+        if (daily.completed) {
+          completedTasks += 1;
+        }
+      });
+    });
+
+    return totalTasks === 0 ? 0 : (completedTasks / totalTasks) * 100;
+  };
+
+  const completionPercentage = calculateCompletion(goal.tasks);
 
   return (
     <Card>
@@ -51,36 +70,31 @@ export function GoalDetails({ goal }: GoalDetailsProps) {
         <div className="flex flex-col space-y-4 md:flex-row md:items-start md:justify-between md:space-y-0">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold">{goal.title}</h1>
+              <h1 className="text-2xl font-bold text-white">{goal.title}</h1>
             </div>
-            <p className="text-muted-foreground">{goal.description}</p>
+            <p className="text-gray-300">{goal.description}</p>
           </div>
-          <div className="flex items-center gap-2">
-            <Link href={`/goals/${goal.id}/edit`}>
-              <Button variant="outline" size="sm" className="gap-1">
-                <Edit className="h-4 w-4" />
-                <span>Edit</span>
-              </Button>
-            </Link>
-          </div>
+          <EditGoalButton goalId={goal.id} />
         </div>
 
         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="flex items-center gap-2 rounded-md border p-3">
-            <Calendar className="h-5 w-5 text-muted-foreground" />
+          <div className="flex items-center gap-2 rounded-md border p-3 border-gray-700 ">
+            <Calendar className="h-5 w-5 text-gray-400" />
             <div>
-              <p className="text-sm font-medium">Timeline</p>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm font-medium text-gray-100">Timeline</p>
+              <p className="text-sm text-gray-400">
                 {formatDate(startDate, false)} - {formatDate(endDate, false)}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 rounded-md border p-3">
-            <Clock className="h-5 w-5 text-muted-foreground" />
+          <div className="flex items-center gap-2 rounded-md border p-3 border-gray-700 ">
+            <Clock className="h-5 w-5 text-gray-400" />
             <div>
-              <p className="text-sm font-medium">Time Remaining</p>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm font-medium text-gray-100">
+                Time Remaining
+              </p>
+              <p className="text-sm text-gray-400">
                 {daysRemaining > 0
                   ? `${daysRemaining} days left`
                   : daysRemaining === 0
@@ -90,11 +104,11 @@ export function GoalDetails({ goal }: GoalDetailsProps) {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 rounded-md border p-3">
-            <Target className="h-5 w-5 text-muted-foreground" />
+          <div className="flex items-center gap-2 rounded-md border p-3 border-gray-700">
+            <Target className="h-5 w-5 text-gray-400" />
             <div>
-              <p className="text-sm font-medium">Tasks</p>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm font-medium text-gray-100">Tasks</p>
+              <p className="text-sm text-gray-400">
                 {completedTasks} of {totalTasks} completed
               </p>
             </div>
@@ -103,8 +117,10 @@ export function GoalDetails({ goal }: GoalDetailsProps) {
 
         <div className="mt-6 space-y-2">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium">Progress</p>
-            <p className="text-sm font-medium">{completionPercentage}%</p>
+            <p className="text-sm font-medium text-gray-400">Progress</p>
+            <p className="text-sm font-medium text-gray-400">
+              {completionPercentage}%
+            </p>
           </div>
           <Progress value={completionPercentage} className="h-2" />
         </div>

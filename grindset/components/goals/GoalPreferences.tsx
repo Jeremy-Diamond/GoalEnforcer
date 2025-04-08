@@ -49,6 +49,8 @@ export function GoalPreferences({
     setPreferences({ ...preferences, [name]: value });
   };
 
+  console.log(preferences);
+
   return (
     <div className="space-y-6">
       <Card>
