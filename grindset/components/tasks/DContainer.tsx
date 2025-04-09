@@ -28,8 +28,6 @@ export default async function DContainer ({gdate = new Date()}: DContainerProps)
     const viewthedate = gdate;
     const goal = await getCurrentUserGoals();
     let dateMessage = "";
-    //console.log("Goals retrieved:", goal); 
-    //console.log("Date passed:", gdate);
 
     if ( viewthedate.toDateString() === todayDate.toDateString()){
         dateMessage = "Today's Goals";
@@ -53,9 +51,6 @@ export default async function DContainer ({gdate = new Date()}: DContainerProps)
                 {/* goal task lists */}
                 <div className="md:flex ">
                     {goal.map((goal:Goal) => {
-                        //console.log("goal data: ", goal);
-                        //console.log("goal id:", goal._id.toString());
-                        //console.log("gdate", gdate);
                         return (
                         <div key={goal._id.toString()} className="mb-4 md:mr-4"> 
                             <DailyChecklist gid={goal._id.toString()} ddate={gdate.toString()} />
@@ -66,6 +61,4 @@ export default async function DContainer ({gdate = new Date()}: DContainerProps)
 
             </div>
         )
-
-    //(gdate.getDate() === todayDate.getDate()) && (gdate.getMonth() === todayDate.getMonth()) && (gdate.getFullYear() === todayDate.getFullYear())
 }

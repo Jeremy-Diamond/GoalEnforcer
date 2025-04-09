@@ -86,14 +86,14 @@ export async function getCurrentUserGoals() {
 // get goal by id
 
 export async function getGoalById(id: string) {
-    try {
-        await dbConnect();
-        const goal = await Goal.findById(id).exec();
-        return goal;
-    } catch (error) {
-        console.error("An error occurred while getting the goal", error);
-        return null;
-    }
+  try {
+      await dbConnect();
+      const goal = await Goal.findById(id).exec();
+      return goal;
+  } catch (error) {
+      console.error("An error occurred while getting the goal", error);
+      return null;
+  }
 }
 
 // update goal by id
@@ -211,25 +211,11 @@ export async function updateDaily(goalId: string, taskId: string, completedId: s
       return null;
     }
     
-    return updateDaily;
+    //return updateDaily;
+    return {success: true};
   } catch (error){
     console.error('An error occured while retrieving the task', error);
     throw error;
   }
 }
-// export async function updateDailyCompleted(goalId: string, taskId: string, dayDate: Date, checked:Boolean){
-//   let theDate = new Date(dayDate);
-  
-//   try{
-//     await dbConnect();
-//     const result = await Goal.findById(taskId).exec();
-//     if((result.dailyCompletion.dueDate.getDate() == theDate.getDate()) && (result.dailyCompletion.dueDate.getMonth() == theDate.getMonth() && (result.dailyCompletion.dueDate.getFullYear() == theDate.getFullYear())) {
-//       Goal.updateOne({_id: taskId}, {})
-//     }
-//     return result;
 
-//   } catch (error) {
-//     console.error("An error occurred while updating the Daily", error);
-//     return null;
-//   }
-// }
