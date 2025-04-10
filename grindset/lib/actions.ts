@@ -86,14 +86,14 @@ export async function getCurrentUserGoals() {
 // get goal by id
 
 export async function getGoalById(id: string) {
-    try {
-        await dbConnect();
-        const goal = await Goal.findById(id).exec();
-        return goal;
-    } catch (error) {
-        console.error("An error occurred while getting the goal", error);
-        return null;
-    }
+  try {
+      await dbConnect();
+      const goal = await Goal.findById(id).exec();
+      return goal;
+  } catch (error) {
+      console.error("An error occurred while getting the goal", error);
+      return null;
+  }
 }
 
 // update goal by id
@@ -134,3 +134,88 @@ export async function deleteGoalById(id: string) {
         return null;
     }
 }
+
+type Task = {
+  _id: string;
+  taskTitle: string;
+  dailyCompletion: DailyCompletion[];
+};
+
+type DailyCompletion = {
+  _id: string;
+  dayCount: number;
+  dueDate: Date;
+  completed: boolean;
+};
+
+export async function getDailyCompletionId(goalId: string, taskId: string, taskdate: Date){
+  
+  const taskdateDay = taskdate.getDate();
+  try {
+    await dbConnect();
+
+    const goal = await Goal.findOne({
+      _id:goalId,
+      "task._id":taskId
+
+    });
+    if (!goal) {
+      console.error("goal or task not found");
+      return null;
+    }
+
+    const task = goal.tasks.find((t: Task) => t._id.toString() === taskId);
+
+    if (!task){
+      console.error("task not found");
+      return null;
+    }
+
+    const dailyCompletion = task.dailyCompletion.find((d:DailyCompletion) => d.dueDate.getDate() === taskdateDay);
+
+    if (!dailyCompletion) {
+      console.error("DailyCompletion not found for the date");
+      return null;
+    }
+
+    return dailyCompletion._id.toString();
+  } catch (error) {
+    console.error("error finding dailycompletion:", error);
+    return null;
+}
+}
+
+
+export async function updateDaily(goalId: string, taskId: string, completedId: string, completed: boolean){
+  try {
+    await dbConnect();
+    const updateDaily = await Goal.findOneAndUpdate(
+      {
+        _id: goalId,
+        "tasks._id": taskId,
+        "tasks.dailyCompletion._id": completedId,
+      },
+      {
+        $set: {
+          "tasks.$.dailyCompletion.$[elem].completed": completed
+        }
+      },
+      {
+        arrayFilters: [{"elem._id": completedId}],
+        new: true
+      }
+    );
+
+    if (!updateDaily){
+      console.error("Goal or task not found, or update failed");
+      return null;
+    }
+    
+    //return updateDaily;
+    return {success: true};
+  } catch (error){
+    console.error('An error occured while retrieving the task', error);
+    throw error;
+  }
+}
+
