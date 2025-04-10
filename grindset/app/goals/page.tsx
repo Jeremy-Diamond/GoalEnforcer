@@ -3,8 +3,21 @@ import DContainer from "@/app/components/tasks/DContainer";
 import { getCurrentUserGoals } from "@/app/lib/actions";
 import Link from "next/link";
 
-export default async function Goals() {
+export default async function Goals({searchParams}: {
+  searchParams: Promise<Record<string, string | undefined>>;
+}) {
   const goals = await getCurrentUserGoals();
+  const selectparams = await searchParams;
+  const fixparams = new Date(selectparams.date + "T00:00:00");
+  //console.log("fixparams:" + fixparams);
+  const fix2 = fixparams.setHours(0,0,0,0);
+  //console.log("fixparams:" + fix2);
+  //const rawDate = selectparams.date;
+  //const parsedDate = new Date(`${rawDate}T00:00:00`);
+  const selectaDate = new Date(fix2 || new Date().setHours(0,0,0,0)) ;
+  //const selectaDate = new Date(selectparams.date || new Date().setHours(0,0,0,0)) ;
+  //console.log(selectparams);
+  //console.log("Parameters:" + selectaDate);
   //console.log("Found Goals:", goals);
   //testing different goal dates
   //const fakedate = new Date("Sun Apr 06 2025 14:38:36 GMT-0600 (Mountain Daylight Time)")
@@ -23,7 +36,8 @@ export default async function Goals() {
           </Link>
         ))}
       </ul>
-      <DContainer />
+      {/* <DContainer /> */}
+      <DContainer gdate={selectaDate} />
     </div>
   );
 }

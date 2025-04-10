@@ -150,7 +150,8 @@ type DailyCompletion = {
 
 export async function getDailyCompletionId(goalId: string, taskId: string, taskdate: Date){
   
-  const taskdateDay = taskdate.getDate();
+  //const taskdateDay = taskdate.getDate();
+  const taskdateDay = taskdate.toDateString();
   try {
     await dbConnect();
 
@@ -171,7 +172,8 @@ export async function getDailyCompletionId(goalId: string, taskId: string, taskd
       return null;
     }
 
-    const dailyCompletion = task.dailyCompletion.find((d:DailyCompletion) => d.dueDate.getDate() === taskdateDay);
+    //const dailyCompletion = task.dailyCompletion.find((d:DailyCompletion) => d.dueDate.getDate() === taskdateDay);
+    const dailyCompletion = task.dailyCompletion.find((d:DailyCompletion) => d.dueDate.toDateString() === taskdateDay);
 
     if (!dailyCompletion) {
       console.error("DailyCompletion not found for the date");
