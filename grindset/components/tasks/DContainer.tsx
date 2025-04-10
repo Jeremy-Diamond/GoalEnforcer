@@ -2,7 +2,7 @@ import { getCurrentUserGoals } from "@/app/lib/actions";
 import DailyChecklist from "./DailyChecklist";
 
 type DContainerProps = {
-    gdate?:Date;
+    gdate: Date;
 }
 
 interface DailyCompletion {
@@ -23,16 +23,19 @@ interface Goal {
     tasks: Task[];
 }
 
-export default async function DContainer ({gdate = new Date()}: DContainerProps) {
+export default async function DContainer ({gdate }: DContainerProps) {
     const todayDate = new Date();
     const viewthedate = gdate;
     const goal = await getCurrentUserGoals();
     let dateMessage = "";
+    //console.log(gdate.toString());
+    //console.log(viewthedate.toDateString());
+    //console.log(viewthedate.getDay());
 
     if ( viewthedate.toDateString() === todayDate.toDateString()){
         dateMessage = "Today's Goals";
     } else {
-        dateMessage = (viewthedate.getMonth() + "/" + viewthedate.getDate() + "/" + viewthedate.getFullYear() + " Goals");
+        dateMessage = ((viewthedate.getMonth() + 1) + "/" + viewthedate.getDate() + "/" + viewthedate.getFullYear() + " Goals");
     }
         return (
             <div className="rounded-lg border border-[#2D3748] bg-[#1E2132] text-[#F8FAFC] shadow-md transition-colors p-4">

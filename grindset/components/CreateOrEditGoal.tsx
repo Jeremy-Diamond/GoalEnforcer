@@ -84,8 +84,16 @@ export default function CreateOrEditGoal({ goal, mode }: CreateGoalProps) {
     //console.log('Adding task:', newTaskTitle); // Debugging line to check the task title
   
     // Calculate the number of days between startDate and endDate
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+    //const start = new Date(startDate);
+
+    const startover = new Date(startDate);
+    const start2 = startover.setHours(0,0,0,0);
+    const start = new Date(start2);
+
+    const endover = new Date(endDate);
+    const end2 = endover.setHours(0,0,0,0);
+    const end = new Date(end2);
+    //const end = new Date(endDate);
     const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)); // Difference in days
   
     // Generate the dailyCompletion array
