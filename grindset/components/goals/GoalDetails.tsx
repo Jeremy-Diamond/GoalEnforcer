@@ -7,6 +7,7 @@ import { Progress } from "../../components/ui/Progress";
 import DeleteGoalButton from "./DeleteGoalButton";
 import EditGoalButton from "./EditGoalButton";
 interface DailyCompletion {
+  date: string; // Example format: '2025-04-11'
   completed: boolean;
 }
 
@@ -45,24 +46,25 @@ export function GoalDetails({ goal }: GoalDetailsProps) {
   const daysRemaining = getDaysRemaining(goal.endDate);
 
   // Calculate completion percentage based on completed tasks
-  let completedTasks = 0;
-
   const totalTasks = goal.tasks.length;
+  let totalCompleted = 0;
+  const calculateCompletionPercentage = (tasks: Task[]): number => {
+    let totalEntries = 0;
 
-  const calculateCompletion = (tasks: Task[]): number => {
     tasks.forEach((task) => {
-      task.dailyCompletion.forEach((daily: DailyCompletion) => {
-        console.log("DAILY", daily);
-        if (daily.completed) {
-          completedTasks += 1;
+      task.dailyCompletion.forEach((entry) => {
+        totalEntries += 1;
+        if (entry.completed) {
+          totalCompleted += 1;
         }
       });
     });
 
-    return totalTasks === 0 ? 0 : (completedTasks / totalTasks) * 100;
+    return totalEntries === 0 ? 0 : (totalCompleted / totalEntries) * 100;
   };
 
-  const completionPercentage = calculateCompletion(goal.tasks);
+  const completionPercentage = calculateCompletionPercentage(goal.tasks);
+  console.log(completionPercentage);
 
   return (
     <div className="w-full relative">
@@ -113,7 +115,7 @@ export function GoalDetails({ goal }: GoalDetailsProps) {
                 <div>
                   <p className="text-sm font-medium text-gray-100">Tasks</p>
                   <p className="text-sm text-gray-400">
-                    {completedTasks} of {totalTasks} completed
+                    0 of {totalTasks} completed
                   </p>
                 </div>
               </div>
@@ -123,7 +125,7 @@ export function GoalDetails({ goal }: GoalDetailsProps) {
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium text-gray-400">Progress</p>
                 <p className="text-sm font-medium text-gray-400">
-                  {completionPercentage}%
+                  {completionPercentage.toFixed(0)}%
                 </p>
               </div>
               <Progress value={completionPercentage} className="h-2" />
