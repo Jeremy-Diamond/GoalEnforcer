@@ -19,7 +19,7 @@ const GoalSchema = new mongoose.Schema({
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
     completed: { type: Boolean, required: true },
-    allowCollaboration: { type: Boolean, default: false },
+    recieveEmailReminders: { type: Boolean, default: false },
     dailyDeadlineTime: { type: String, default: '' },
     reminderFrequency: { type: String, enum: ['daily', 'weekly', 'monthly'], default: '' },
     tasks: { type: [TaskSchema], default: [] }
