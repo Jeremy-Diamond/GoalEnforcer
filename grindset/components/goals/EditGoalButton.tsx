@@ -13,7 +13,7 @@ export default function EditGoalButton({ goalId }: EditGoalButtonProps) {
       <Button
         variant="outline"
         size="sm"
-        className="gap-1"
+        className="gap-1 cursor-pointer hover:bg-yellow-500 hover:text-black"
         onClick={() => {
           router.push(`/goals/${goalId}/edit`);
         }}
