@@ -10,7 +10,7 @@ import { deleteGoalById } from "../../lib/actions";
 export default function DeleteGoalButton({ goalId }: { goalId: string }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const router = useRouter();
-  const handleDelete = async (e: React.MouseEvent) => {
+  const handleDelete = async () => {
     try {
       await deleteGoalById(goalId);
       router.push("/goals");
