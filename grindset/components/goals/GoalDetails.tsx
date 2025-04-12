@@ -52,7 +52,7 @@ export function GoalDetails({ goal }: GoalDetailsProps) {
   const calculateCompletion = (tasks: Task[]): number => {
     tasks.forEach((task) => {
       task.dailyCompletion.forEach((daily: DailyCompletion) => {
-        console.log("DAILY", daily);
+        //console.log("DAILY", daily);
         if (daily.completed) {
           completedTasks += 1;
         }

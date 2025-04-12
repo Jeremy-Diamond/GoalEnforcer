@@ -31,13 +31,15 @@ export default async function DailyChecklist ({gid, ddate}:DailyChecklistProps) 
     const tasklist = goal.tasks;
     const gtitle = goal.title || "Untitled Goal"; 
 
+    const selectedDate = new Date(ddate);
+
     return (
         <div className="border border-1 rounded-md p-4">
             <h2 className="font-bold text-lg">{gtitle}</h2>
     
             {tasklist.map((task: Task) => {
                 const dc = task.dailyCompletion.find((entry: DailyCompletion) => {
-                    return new Date(entry.dueDate).toDateString() === new Date(ddate).toDateString()
+                    return new Date(entry.dueDate).toDateString() === selectedDate.toDateString()
                 }
             );
     
@@ -48,12 +50,12 @@ export default async function DailyChecklist ({gid, ddate}:DailyChecklistProps) 
             return (
                 <div key={taskId} className="flex items-center mb-2">
                     <Checklist
-                        
                         goalId={goal._id.toString()}
                         taskId={taskId}
                         dcId={dcId}
                         tTitle={task.taskTitle}
                         checked={isChecked}
+                        selectedDate={selectedDate}
                     />
                 </div>
             );

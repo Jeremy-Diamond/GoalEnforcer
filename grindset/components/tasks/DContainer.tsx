@@ -45,10 +45,6 @@ export default async function DContainer ({gdate }: DContainerProps) {
                         <h2 className="text-2xl font-bold text-center">{dateMessage}</h2>
                         {/* <p>Your scheduled goals for today</p>  */}
                     </div>
-                    <div className="collapse md:visible">
-                        <button className="border border-1 border-white rounded-md pl-2 pr-2 mr-1 text-lg">{"<"}</button>
-                        <button className="border border-1 border-white rounded-md pl-2 pr-2 text-lg">{">"}</button>
-                    </div>
                 </div>
 
                 {/* goal task lists */}

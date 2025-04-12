@@ -2,6 +2,7 @@
 
 import { updateDaily } from "@/app/lib/actions";
 import { useTransition } from "react";
+import { useEffect } from "react";
 
 type ChecklistProps = {
     tTitle: string;
@@ -9,10 +10,23 @@ type ChecklistProps = {
     taskId: string;
     dcId: string;
     checked: boolean;
+    selectedDate: Date;
 }
 
-export default function Checklist ({goalId, taskId, dcId, checked, tTitle}:ChecklistProps) {
+export default function Checklist ({
+    goalId, 
+    taskId, 
+    dcId, 
+    checked, 
+    tTitle,
+    selectedDate
+}:ChecklistProps) {
     
+    useEffect(() => {
+        // This effect runs whenever the selectedDate changes
+        console.log("Selected Date changed:", selectedDate);
+      }, [selectedDate]);
+
     const [isPending, startTransition] = useTransition();
 
     const updateDatabase = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -27,6 +41,7 @@ export default function Checklist ({goalId, taskId, dcId, checked, tTitle}:Check
         <div className="flex">
             {isPending && <p>Updating...</p>}
             <input 
+                title="updateDatabase"
                 type="checkbox"  
                 className="mr-4"
                 defaultChecked={checked} 

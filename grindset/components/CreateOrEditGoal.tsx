@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { createGoal, updateGoalById } from '../lib/actions';
 import { useUser } from '@clerk/nextjs';
 import { formatTimeToInput } from '../lib/utils';
+import { useRouter } from 'next/navigation';
 
 interface Task {
   _id?: string; // MongoDB will generate this automatically
@@ -22,7 +23,7 @@ interface GoalData {
   startDate: string;
   endDate: string;
   completed: boolean;
-  allowCollaboration: boolean;
+  recieveEmailReminders: boolean;
   dailyDeadlineTime: string;
   reminderFrequency: string;
   tasks: Task[];
@@ -37,7 +38,7 @@ interface Goal {
   startDate?: string;
   endDate?: string;
   completed?: boolean;
-  allowCollaboration?: boolean;
+  recieveEmailReminders?: boolean;
   dailyDeadlineTime?: string;
   reminderFrequency?: string;
   tasks?: Task[];
@@ -49,13 +50,14 @@ interface CreateGoalProps {
 }
 
 export default function CreateOrEditGoal({ goal, mode }: CreateGoalProps) {
+  const router = useRouter();
   const user = useUser();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [completed, setCompleted] = useState(false);
-  const [allowCollaboration, setAllowCollaboration] = useState(false);
+  const [recieveEmailReminders, setrecieveEmailReminders] = useState(false);
   const [dailyDeadlineTime, setDailyDeadlineTime] = useState('');
   const [reminderFrequency, setReminderFrequency] = useState('');
   const [tasks, setTasks] = useState<Task[]>([]); // State for tasks
@@ -68,7 +70,7 @@ export default function CreateOrEditGoal({ goal, mode }: CreateGoalProps) {
       setStartDate(goal.startDate ? goal.startDate.split('T')[0] : '');
       setEndDate(goal.endDate ? goal.endDate.split('T')[0] : '');
       setCompleted(goal.completed || false);
-      setAllowCollaboration(goal.allowCollaboration || false);
+      setrecieveEmailReminders(goal.recieveEmailReminders || false);
       setDailyDeadlineTime(formatTimeToInput(goal.dailyDeadlineTime));
       setReminderFrequency(goal.reminderFrequency || '');
       setTasks(goal.tasks || []); // Pre-fill tasks if editing
@@ -153,7 +155,7 @@ export default function CreateOrEditGoal({ goal, mode }: CreateGoalProps) {
     formData.append('startDate', startDate);
     formData.append('endDate', endDate);
     formData.append('completed', completed.toString());
-    formData.append('allowCollaboration', allowCollaboration.toString());
+    formData.append('recieveEmailReminders', recieveEmailReminders.toString());
     formData.append('dailyDeadlineTime', dailyDeadlineTime);
     formData.append('reminderFrequency', reminderFrequency);
     formData.append('userId', user.user?.id || '');
@@ -169,7 +171,7 @@ export default function CreateOrEditGoal({ goal, mode }: CreateGoalProps) {
           startDate,
           endDate,
           completed,
-          allowCollaboration,
+          recieveEmailReminders,
           dailyDeadlineTime,
           reminderFrequency,
           tasks: JSON.parse(formData.get('tasks') as string),
@@ -184,6 +186,7 @@ export default function CreateOrEditGoal({ goal, mode }: CreateGoalProps) {
               dayCount: dc.dayCount,
             })),
           })),
+          allowCollaboration: false
         });
       } else if (mode === 'edit' && goal?._id) {
         const goalUpdateData = {
@@ -192,13 +195,14 @@ export default function CreateOrEditGoal({ goal, mode }: CreateGoalProps) {
           startDate,
           endDate,
           completed,
-          allowCollaboration,
+          recieveEmailReminders,
           dailyDeadlineTime,
           reminderFrequency,
           tasks: JSON.stringify(tasks),
           userId: user.user?.id || ''
         };
         await updateGoalById(goal._id, goalUpdateData);
+        router.push('/goals')
       }
     } catch (error) {
       console.error('An error occurred while creating or updating the goal', error);
@@ -207,8 +211,12 @@ export default function CreateOrEditGoal({ goal, mode }: CreateGoalProps) {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-900">
-      <form onSubmit={handleSubmit} className="bg-gray-800 p-6 rounded-lg shadow-md w-full max-w-md">
+<div className="flex items-center justify-center min-h-screen bg-gray-900">
+  <form onSubmit={handleSubmit} className="bg-gray-800 p-8 rounded-lg shadow-md w-full max-w-4xl">
+  <h1 className="text-xl font-extrabold pb-4" >Goal Details</h1>
+    <div className="grid grid-cols-2 gap-6">
+      {/* Left Column */}
+      <div>
         {/* Title */}
         <div className="mb-4">
           <label className="block text-white text-sm font-bold mb-2">Title:</label>
@@ -227,10 +235,11 @@ export default function CreateOrEditGoal({ goal, mode }: CreateGoalProps) {
           <textarea
             value={description}
             onChange={(event) => setDescription(event.target.value)}
-            className="w-full p-2 text-white-900 rounded-md border border-gray-600"
+            className="w-full p-2 text-white rounded-md border border-gray-600"
             placeholder="Enter goal description"
           />
         </div>
+
         {/* Start Date */}
         <div className="mb-4">
           <label className="block text-white text-sm font-bold mb-2">Start Date:</label>
@@ -253,20 +262,24 @@ export default function CreateOrEditGoal({ goal, mode }: CreateGoalProps) {
             className="w-full p-2 text-white rounded-md border border-gray-600"
             placeholder="Select end date"
           />
-        </div>  
+        </div>
+      </div>
 
-        {/* Allow Collaboration */}
+      {/* Right Column */}
+      <div>
+        {/* Receive Email Reminders */}
         <div className="mb-4">
-          <label className="block text-white-200 text-sm font-bold mb-2">Allow Collaboration:</label>
-          <input
-            type="checkbox"
-            title="Allow collaboration"
-            placeholder="Allow collaboration"
-            checked={allowCollaboration}
-            onChange={(event) => setAllowCollaboration(event.target.checked)}
-            className="mr-2"
-          />
-          <span className="text-white">Enable collaboration</span>
+          <label className="block text-white text-sm font-bold mb-2">Receive Email Reminders:</label>
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              title="Receive Email Reminders"
+              checked={recieveEmailReminders}
+              onChange={(event) => setrecieveEmailReminders(event.target.checked)}
+              className="mr-2"
+            />
+            <span className="text-white">Check box to receive email reminders</span>
+          </div>
         </div>
 
         {/* Daily Deadline Time */}
@@ -275,7 +288,6 @@ export default function CreateOrEditGoal({ goal, mode }: CreateGoalProps) {
           <input
             type="time"
             title="Daily deadline time"
-            placeholder="Daily deadline time"
             value={dailyDeadlineTime}
             onChange={(event) => setDailyDeadlineTime(event.target.value)}
             className="w-full p-2 text-white rounded-md border border-gray-600"
@@ -286,76 +298,71 @@ export default function CreateOrEditGoal({ goal, mode }: CreateGoalProps) {
         <div className="mb-4">
           <label className="block text-white text-sm font-bold mb-2">Reminder Frequency:</label>
           <select
+            title='reminderFrequency'
             value={reminderFrequency}
             onChange={(event) => setReminderFrequency(event.target.value)}
             className="w-full p-2 text-white rounded-md border border-gray-600"
-            aria-label="Select reminder frequency"
           >
-            <option className= "text-black" value="">Select frequency</option>
-            <option className= "text-black" value="daily">Daily</option>
-            <option className= "text-black" value="weekly">Weekly</option>
-            <option className= "text-black" value="monthly">Monthly</option>
+            <option className="text-black" value="">Select frequency</option>
+            <option className="text-black" value="daily">Daily</option>
+            <option className="text-black" value="weekly">Weekly</option>
+            <option className="text-black" value="monthly">Monthly</option>
           </select>
         </div>
+      </div>
+    </div>
 
-        {/* Tasks */}
-        <div className="mb-4">
-          <label className="block text-white text-sm font-bold mb-2">Tasks:</label>
-          <div className="flex items-center mb-2">
+    {/* Tasks Section */}
+    <div className="mt-6 mb-4">
+      <label className="block text-white text-sm font-bold mb-2">Daily Tasks:</label>
+      <div className="flex items-center mb-2">
+        <input
+          type="text"
+          value={newTaskTitle}
+          onChange={(event) => setNewTaskTitle(event.target.value)}
+          className="w-full p-2 text-white rounded-md border border-gray-600"
+          placeholder="Enter task title"
+        />
+        <button
+          type="button"
+          onClick={addTask}
+          className="ml-2 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Add
+        </button>
+      </div>
+      <ul className="list-disc pl-5">
+        {tasks.map((task, index) => (
+          <li key={index} className="flex items-center justify-between mb-2">
             <input
               type="text"
-              value={newTaskTitle}
-              onChange={(event) => setNewTaskTitle(event.target.value)}
+              value={task.taskTitle}
+              onChange={(event) => updateTask(index, { taskTitle: event.target.value })}
               className="w-full p-2 text-white rounded-md border border-gray-600"
+              title="Task title"
               placeholder="Enter task title"
             />
             <button
               type="button"
-              onClick={addTask}
-              className="ml-2 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+              onClick={() => removeTask(index)}
+              className="ml-2 bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
             >
-              Add
+              Remove
             </button>
-          </div>
-          <ul className="list-disc pl-5">
-            {tasks.map((task, index) => (
-              <li key={index} className="flex items-center justify-between mb-2">
-                <input
-                  type="text"
-                  value={task.taskTitle}
-                  onChange={(event) => updateTask(index, { taskTitle: event.target.value })}
-                  className="w-full p-2 text-white rounded-md border border-gray-600"
-                  title="Task title"
-                  placeholder="Enter task title"
-                />
-                <label className="ml-2 flex items-center">
-                  <input
-                    type="checkbox"
-                    title="Mark task as complete"
-                    aria-label="Mark task as complete"
-                    checked={task.completed}
-                    onChange={(event) => updateTask(index, { completed: event.target.checked })}
-                    className="mr-1"
-                  />
-                  <span className="text-white text-sm">Complete</span>
-                </label>
-                <button
-                  type="button"
-                  onClick={() => removeTask(index)}
-                  className="ml-2 bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
-                >
-                  Remove
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Submit Button */}
-        <button type="submit" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-          {mode === 'create' ? 'Create Goal' : 'Update Goal'}
-        </button>
-      </form>
+          </li>
+        ))}
+      </ul>
     </div>
+
+    {/* Submit Button */}
+    <button
+      type="submit"
+      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+    >
+      {mode === 'create' ? 'Create Goal' : 'Update Goal'}
+    </button>
+  </form>
+</div>
+
   );
 }
