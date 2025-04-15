@@ -33,6 +33,13 @@ export default async function DailyChecklist ({gid, ddate}:DailyChecklistProps) 
 
     const selectedDate = new Date(ddate);
 
+    const startDate = new Date(goal.startDate);
+    const endDate = new Date(goal.endDate);
+
+    const indaRange = selectedDate >= startDate && selectedDate <= endDate;
+
+    if (indaRange) {
+
     return (
         <div className="border border-1 rounded-md p-4">
             <h2 className="font-bold text-lg">{gtitle}</h2>
@@ -46,7 +53,7 @@ export default async function DailyChecklist ({gid, ddate}:DailyChecklistProps) 
             const dcId = dc?._id?.toString() ?? "";
             const isChecked = dc?.completed ?? false;
             const taskId = String(task._id);
-    
+            // console.log("dc:" + isChecked);
             return (
                 <div key={taskId} className="flex items-center mb-2">
                     <Checklist
@@ -62,5 +69,5 @@ export default async function DailyChecklist ({gid, ddate}:DailyChecklistProps) 
           })}
         </div>
       );
-
+    }  
 }
