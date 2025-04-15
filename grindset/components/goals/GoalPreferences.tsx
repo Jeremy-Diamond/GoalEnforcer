@@ -21,10 +21,9 @@ import {
 import { Switch } from "../../components/ui/Switch";
 
 interface Preferences {
-  emailReminders: boolean;
   reminderFrequency: string;
   deadlineTime: string;
-  allowCollaboration: boolean;
+  receiveEmailReminders: boolean;
   collaborators: string[];
 }
 
@@ -71,14 +70,14 @@ export function GoalPreferences({
             {disabled ? null : (
               <Switch
                 id="email-reminders"
-                checked={preferences.emailReminders}
+                checked={preferences.receiveEmailReminders}
                 onCheckedChange={(checked) =>
-                  handleSwitchChange("emailReminders", checked)
+                  handleSwitchChange("receiveEmailReminders", checked)
                 }
               />
             )}
           </div>
-          {preferences.emailReminders && (
+          {preferences.receiveEmailReminders && (
             <div className="space-y-2">
               <Label htmlFor="reminder-frequency">Reminder Frequency</Label>
 
