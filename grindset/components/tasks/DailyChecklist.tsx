@@ -42,7 +42,7 @@ export default async function DailyChecklist ({gid, ddate}:DailyChecklistProps) 
 
     return (
         <div className="border border-1 rounded-md p-4">
-            <h2 className="font-bold text-lg">{gtitle}</h2>
+            <h2 className=" text-2xl font-bold text-white text-center mb-4">{gtitle}</h2>
     
             {tasklist.map((task: Task) => {
                 const dc = task.dailyCompletion.find((entry: DailyCompletion) => {
