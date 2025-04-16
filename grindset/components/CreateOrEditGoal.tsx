@@ -11,41 +11,41 @@ import { formatTimeToInput } from "../lib/utils"; // Utility function to format 
 interface Task {
   _id?: string; // Optional MongoDB-generated ID
   taskTitle: string; // Title of the task
-  completed: boolean; // Whether the task is completed
+  completed: boolean; // Indicates whether the task is completed
   dailyCompletion?: {
     dayCount: number; // Day number in the goal timeline
     dueDate: Date; // Due date for the task
-    completed: boolean; // Whether the task is completed on this day
-  }[];
+    completed: boolean; // Indicates whether the task is completed on this day
+  }[]; // Array of daily completion records for the task
 }
 
 // Define the structure of goal data for creation or update
 interface GoalData {
-  title: string;
-  description: string;
-  startDate: string;
-  endDate: string;
-  completed: boolean;
-  receiveEmailReminders: boolean;
-  dailyDeadlineTime: string;
-  reminderFrequency: string;
-  tasks: Task[];
-  userId: string;
+  title: string; // Title of the goal
+  description: string; // Description of the goal
+  startDate: string; // Start date of the goal
+  endDate: string; // End date of the goal
+  completed: boolean; // Indicates whether the goal is completed
+  receiveEmailReminders: boolean; // Indicates whether email reminders are enabled
+  dailyDeadlineTime: string; // The daily deadline time for the goal
+  reminderFrequency: string; // Frequency of reminders (e.g., daily, weekly)
+  tasks: Task[]; // Array of tasks associated with the goal
+  userId: string; // ID of the user who owns the goal
 }
 
 // Define the structure of a goal for editing
 interface Goal {
-  _id?: string;
-  id?: string;
-  title: string;
-  description: string;
-  startDate?: string;
-  endDate?: string;
-  completed?: boolean;
-  receiveEmailReminders?: boolean;
-  dailyDeadlineTime?: string;
-  reminderFrequency?: string;
-  tasks?: Task[];
+  _id?: string; // Optional MongoDB-generated ID
+  id?: string; // Optional alternative ID
+  title: string; // Title of the goal
+  description: string; // Description of the goal
+  startDate?: string; // Optional start date
+  endDate?: string; // Optional end date
+  completed?: boolean; // Optional completion status
+  receiveEmailReminders?: boolean; // Optional email reminders flag
+  dailyDeadlineTime?: string; // Optional daily deadline time
+  reminderFrequency?: string; // Optional reminder frequency
+  tasks?: Task[]; // Optional array of tasks
 }
 
 // Props for the `CreateOrEditGoal` component
@@ -93,12 +93,16 @@ export default function CreateOrEditGoal({ goal, mode }: CreateGoalProps) {
       return; // Prevent adding empty tasks
     }
 
-    // Calculate the number of days between startDate and endDate
-    const start = new Date(new Date(startDate).setHours(0, 0, 0, 0));
-    const end = new Date(new Date(endDate).setHours(0, 0, 0, 0));
+    const startover = new Date(startDate);
+    const start2 = startover.setHours(0, 0, 0, 0);
+    const start = new Date(start2);
+
+    const endover = new Date(endDate);
+    const end2 = endover.setHours(0, 0, 0, 0);
+    const end = new Date(end2);
     const days = Math.ceil(
       (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
-    );
+    ); // Difference in days
 
     // Generate the dailyCompletion array
     const dailyCompletion = Array.from({ length: days }, (_, i) => ({
@@ -152,6 +156,19 @@ export default function CreateOrEditGoal({ goal, mode }: CreateGoalProps) {
       return;
     }
 
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("description", description);
+    formData.append("startDate", startDate);
+    formData.append("endDate", endDate);
+    formData.append("completed", completed.toString());
+    formData.append("receiveEmailReminders", receiveEmailReminders.toString());
+    formData.append("dailyDeadlineTime", dailyDeadlineTime);
+    formData.append("reminderFrequency", reminderFrequency);
+    formData.append("userId", user.user?.id || "");
+    formData.append("tasks", JSON.stringify(tasks)); // Add tasks as a JSON string
+    // console.log("TEST", user);
+
     try {
       if (mode === "create") {
         // Create a new goal
@@ -164,10 +181,20 @@ export default function CreateOrEditGoal({ goal, mode }: CreateGoalProps) {
           receiveEmailReminders,
           dailyDeadlineTime,
           reminderFrequency,
-          tasks,
+          tasks: JSON.parse(formData.get("tasks") as string),
           userId: user.user?.id || "",
         };
-        await createGoal(goalData);
+        await createGoal({
+          ...goalData,
+          tasks: goalData.tasks.map((task) => ({
+            taskTitle: task.taskTitle,
+            dailyCompletion: task.dailyCompletion?.map((dc) => ({
+              dueDate: dc.dueDate,
+              dayCount: dc.dayCount,
+            })),
+          })),
+          receiveEmailReminders: receiveEmailReminders,
+        });
       } else if (mode === "edit" && goal?._id) {
         // Update an existing goal
         const goalUpdateData = {
@@ -202,9 +229,186 @@ export default function CreateOrEditGoal({ goal, mode }: CreateGoalProps) {
         className="bg-gray-800 p-8 rounded-lg shadow-md w-full max-w-4xl"
       >
         <h1 className="text-xl font-extrabold pb-4">Goal Details</h1>
-        {/* Form fields for goal details */}
-        {/* Tasks section */}
-        {/* Submit button */}
+        <div className="grid grid-cols-2 gap-6">
+          {/* Left Column */}
+          <div>
+            {/* Title */}
+            <div className="mb-4">
+              <label className="block text-white text-sm font-bold mb-2">
+                Title:
+              </label>
+              <input
+                type="text"
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+                className="w-full p-2 text-white rounded-md border border-gray-600"
+                placeholder="Enter goal title"
+              />
+            </div>
+
+            {/* Description */}
+            <div className="mb-4">
+              <label className="block text-white text-sm font-bold mb-2">
+                Description:
+              </label>
+              <textarea
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
+                className="w-full p-2 text-white rounded-md border border-gray-600"
+                placeholder="Enter goal description"
+              />
+            </div>
+
+            {/* Start Date */}
+            <div className="mb-4">
+              <label className="block text-white text-sm font-bold mb-2">
+                Start Date:
+              </label>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(event) => setStartDate(event.target.value)}
+                className="w-full p-2 text-white rounded-md border border-gray-600"
+                placeholder="Select start date"
+              />
+            </div>
+
+            {/* End Date */}
+            <div className="mb-4">
+              <label className="block text-white text-sm font-bold mb-2">
+                End Date:
+              </label>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(event) => setEndDate(event.target.value)}
+                className="w-full p-2 text-white rounded-md border border-gray-600"
+                placeholder="Select end date"
+              />
+            </div>
+          </div>
+
+          {/* Right Column */}
+          <div>
+            {/* Receive Email Reminders */}
+            <div className="mb-4">
+              <label className="block text-white text-sm font-bold mb-2">
+                Receive Email Reminders:
+              </label>
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  title="Receive Email Reminders"
+                  checked={receiveEmailReminders}
+                  onChange={(event) =>
+                    setreceiveEmailReminders(event.target.checked)
+                  }
+                  className="mr-2"
+                />
+                <span className="text-white">
+                  Check box to receive email reminders
+                </span>
+              </div>
+            </div>
+
+            {/* Daily Deadline Time */}
+            <div className="mb-4">
+              <label className="block text-white text-sm font-bold mb-2">
+                Daily Deadline Time:
+              </label>
+              <input
+                type="time"
+                title="Daily deadline time"
+                value={dailyDeadlineTime}
+                onChange={(event) => setDailyDeadlineTime(event.target.value)}
+                className="w-full p-2 text-white rounded-md border border-gray-600"
+              />
+            </div>
+
+            {/* Reminder Frequency */}
+            <div className="mb-4">
+              <label className="block text-white text-sm font-bold mb-2">
+                Reminder Frequency:
+              </label>
+              <select
+                title="reminderFrequency"
+                value={reminderFrequency}
+                onChange={(event) => setReminderFrequency(event.target.value)}
+                className="w-full p-2 text-white rounded-md border border-gray-600"
+              >
+                <option className="text-black" value="">
+                  Select frequency
+                </option>
+                <option className="text-black" value="daily">
+                  Daily
+                </option>
+                <option className="text-black" value="weekly">
+                  Weekly
+                </option>
+                <option className="text-black" value="monthly">
+                  Monthly
+                </option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Tasks Section */}
+        <div className="mt-6 mb-4">
+          <label className="block text-white text-sm font-bold mb-2">
+            Daily Tasks:
+          </label>
+          <div className="flex items-center mb-2">
+            <input
+              type="text"
+              value={newTaskTitle}
+              onChange={(event) => setNewTaskTitle(event.target.value)}
+              className="w-full p-2 text-white rounded-md border border-gray-600"
+              placeholder="Enter task title"
+            />
+            <button
+              type="button"
+              onClick={addTask}
+              className="ml-2 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+            >
+              Add
+            </button>
+          </div>
+          <ul className="list-disc pl-5">
+            {tasks.map((task, index) => (
+              <li
+                key={index}
+                className="flex items-center justify-between mb-2"
+              >
+                <input
+                  type="text"
+                  value={task.taskTitle}
+                  onChange={(event) =>
+                    updateTask(index, { taskTitle: event.target.value })
+                  }
+                  className="w-full p-2 text-white rounded-md border border-gray-600"
+                  title="Task title"
+                  placeholder="Enter task title"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeTask(index)}
+                  className="ml-2 bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
+                >
+                  Remove
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Submit Button */}
+        <button
+          type="submit"
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          {mode === "create" ? "Create Goal" : "Update Goal"}
+        </button>
       </form>
     </div>
   );
