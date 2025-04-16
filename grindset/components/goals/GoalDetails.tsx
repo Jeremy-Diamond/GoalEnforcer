@@ -1,36 +1,12 @@
 import { formatDate } from "@/app/lib/utils";
 import { Calendar, Clock, Target } from "lucide-react";
 
+import { GoalDetailsProps } from "@/app/lib/definitions";
 import Link from "next/link";
 import { Card, CardContent } from "../../components/ui/Card";
 import { Progress } from "../../components/ui/Progress";
 import DeleteGoalButton from "./DeleteGoalButton";
 import EditGoalButton from "./EditGoalButton";
-interface DailyCompletion {
-  date: string; // Example format: '2025-04-11'
-  completed: boolean;
-}
-
-interface Task {
-  id: string;
-  taskTitle: string;
-  completed: boolean;
-  dailyCompletion: DailyCompletion[];
-}
-
-interface Goal {
-  id: string;
-  title: string;
-  description: string;
-  startDate: string;
-  endDate: string;
-  progress: number;
-  tasks: Task[];
-}
-
-interface GoalDetailsProps {
-  goal: Goal;
-}
 
 const getDaysRemaining = (endDate: string) => {
   const end = new Date(endDate);
@@ -40,31 +16,13 @@ const getDaysRemaining = (endDate: string) => {
   return diffDays;
 };
 
-export function GoalDetails({ goal }: GoalDetailsProps) {
+export function GoalDetails({ goal, progress }: GoalDetailsProps) {
   const startDate = new Date(goal.startDate);
   const endDate = new Date(goal.endDate);
   const daysRemaining = getDaysRemaining(goal.endDate);
 
   // Calculate completion percentage based on completed tasks
   const totalTasks = goal.tasks.length;
-  let totalCompleted = 0;
-  const calculateCompletionPercentage = (tasks: Task[]): number => {
-    let totalEntries = 0;
-
-    tasks.forEach((task) => {
-      task.dailyCompletion.forEach((entry) => {
-        totalEntries += 1;
-        if (entry.completed) {
-          totalCompleted += 1;
-        }
-      });
-    });
-
-    return totalEntries === 0 ? 0 : (totalCompleted / totalEntries) * 100;
-  };
-
-  const completionPercentage = calculateCompletionPercentage(goal.tasks);
-  console.log(completionPercentage);
 
   return (
     <div className="w-full relative">
@@ -104,8 +62,8 @@ export function GoalDetails({ goal }: GoalDetailsProps) {
                     {daysRemaining > 0
                       ? `${daysRemaining} days left`
                       : daysRemaining === 0
-                      ? "Due today"
-                      : "Overdue"}
+                        ? "Due today"
+                        : "Overdue"}
                   </p>
                 </div>
               </div>
@@ -125,10 +83,10 @@ export function GoalDetails({ goal }: GoalDetailsProps) {
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium text-gray-400">Progress</p>
                 <p className="text-sm font-medium text-gray-400">
-                  {completionPercentage.toFixed(0)}%
+                  {progress?.toFixed(0)}%
                 </p>
               </div>
-              <Progress value={completionPercentage} className="h-2" />
+              <Progress value={progress} className="h-2" />
             </div>
           </CardContent>
         </Card>

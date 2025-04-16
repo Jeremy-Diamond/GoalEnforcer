@@ -30,7 +30,7 @@ export default async function DailyChecklist({
   const gtitle = goal.title || "Untitled Goal";
 
   return (
-    <div className="border border-1 rounded-md p-4">
+    <div className="border rounded-md p-4">
       <h2 className="font-bold text-lg">{gtitle}</h2>
 
       {tasklist.map((task: Task) => {
@@ -48,7 +48,7 @@ export default async function DailyChecklist({
         return (
           <div key={taskId} className="flex items-center mb-2">
             <Checklist
-              goalId={goal._id.toString()}
+              goal={goal}
               taskId={taskId}
               dcId={dcId}
               tTitle={task.taskTitle}
