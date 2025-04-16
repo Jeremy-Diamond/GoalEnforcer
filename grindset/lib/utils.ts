@@ -82,6 +82,17 @@ export async function scheduleEmailReminders(user: User, goal: Goal) {
     const username = user.firstName;
     const startDate = goal.startDate;
     const endDate = goal.endDate;
+    console.log("Parsed time:", { hour, minute });
+    console.log("Scheduling details:", {
+      frequency,
+      hour,
+      minute,
+      email,
+      username,
+      goalId,
+      startDate,
+      endDate,
+    });
 
     if (!frequency || !["daily", "weekly", "monthly"].includes(frequency)) {
       throw new Error("Invalid or missing reminder frequency");
