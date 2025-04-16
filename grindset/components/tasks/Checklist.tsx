@@ -1,7 +1,7 @@
 'use client';
 
 import { updateDaily } from "@/app/lib/actions";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useEffect } from "react";
 
 type ChecklistProps = {
@@ -19,23 +19,34 @@ export default function Checklist ({
     dcId, 
     checked, 
     tTitle,
-    selectedDate
+    //selectedDate
 }:ChecklistProps) {
     
-    useEffect(() => {
-        // This effect runs whenever the selectedDate changes
-        console.log("Selected Date changed:", selectedDate);
-      }, [selectedDate]);
+    // useEffect(() => {
+    //     // This effect runs whenever the selectedDate changes
+    //     console.log("Selected Date changed:", selectedDate);
+    //   }, [selectedDate]);
 
     const [isPending, startTransition] = useTransition();
+    const [isChecked, setIsChecked] = useState(checked);
+    
+      useEffect(() => {
+        setIsChecked(checked);
+      }, [checked]);
+    
 
     const updateDatabase = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const isChecked = e.target.checked;
-        console.log("ischecked type:", typeof isChecked);
+        const isitChecked = e.target.checked;
+        //console.log("ischecked type:", typeof isChecked);
         startTransition(() => {
-            updateDaily(goalId, taskId, dcId, isChecked);
+            updateDaily(goalId, taskId, dcId, isitChecked);
+            setIsChecked(!isChecked);
         });
     };
+
+    //console.log("checked" + checked);
+    //console.log("ischecked" + isChecked);
+    //console.log
 
     return (
         <div className="flex">
@@ -44,7 +55,7 @@ export default function Checklist ({
                 title="updateDatabase"
                 type="checkbox"  
                 className="mr-4"
-                defaultChecked={checked} 
+                checked={isChecked} 
                 onChange={updateDatabase}
             />
             <div>{tTitle}</div>

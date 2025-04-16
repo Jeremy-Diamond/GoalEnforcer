@@ -33,14 +33,14 @@ export default async function DContainer ({gdate }: DContainerProps) {
     //console.log(viewthedate.getDay());
 
     if ( viewthedate.toDateString() === todayDate.toDateString()){
-        dateMessage = "Today's Goals";
+        dateMessage = "Today's Daily Tasks";
     } else {
-        dateMessage = ((viewthedate.getMonth() + 1) + "/" + viewthedate.getDate() + "/" + viewthedate.getFullYear() + " Goals");
+        dateMessage = ((viewthedate.getMonth() + 1) + "/" + viewthedate.getDate() + "/" + viewthedate.getFullYear() + " Daily Tasks");
     }
         return (
-            <div className="rounded-lg border border-[#2D3748] bg-[#1E2132] text-[#F8FAFC] shadow-md transition-colors p-4">
+            <div className="rounded-lg border border-[#2D3748] bg-[#1E2132] text-[#F8FAFC] shadow-md transition-colors p-6 max-w-7xl w-full relative">
                 {/* upper portion */}
-                <div className="mb-4 md:flex md:justify-between">
+                <div className="mb-4 md:flex ">
                     <div>
                         <h2 className="text-2xl font-bold text-center">{dateMessage}</h2>
                         {/* <p>Your scheduled goals for today</p>  */}

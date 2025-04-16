@@ -202,12 +202,13 @@ export default function CreateOrEditGoal({ goal, mode }: CreateGoalProps) {
           userId: user.user?.id || ''
         };
         await updateGoalById(goal._id, goalUpdateData);
-        router.push('/goals')
+        //router.push("/goals")
       }
     } catch (error) {
       console.error('An error occurred while creating or updating the goal', error);
       alert('Failed to save the goal. Please try again.');
     }
+    router.push("/goals")
   }
 
   return (
