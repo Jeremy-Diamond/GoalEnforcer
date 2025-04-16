@@ -8,6 +8,8 @@ import {
   TabsList,
   TabsTrigger,
 } from "../../../components/ui/Tabs";
+import SubtaskContainer from "@/app/components/subtasks/SubtaskContainer";
+
 //import { notFound } from "next/navigation";
 
 export default async function GoalPage({
@@ -37,6 +39,7 @@ export default async function GoalPage({
             </TabsList>
             <TabsContent value="subtasks" className="mt-6">
               {/* <Subtasks goalId={goalId} tasks={goal.tasks} /> */}
+              <SubtaskContainer gid={goalId}/>
             </TabsContent>
             <TabsContent value="preferences" className="mt-6">
               <GoalPreferences

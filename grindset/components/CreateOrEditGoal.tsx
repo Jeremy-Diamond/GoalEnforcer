@@ -205,7 +205,6 @@ export default function CreateOrEditGoal({ goal, mode }: CreateGoalProps) {
           userId: user.user?.id || "",
         };
         await updateGoalById(goal._id, goalUpdateData);
-        router.push("/goals");
       }
     } catch (error) {
       console.error(
@@ -214,6 +213,7 @@ export default function CreateOrEditGoal({ goal, mode }: CreateGoalProps) {
       );
       alert("Failed to save the goal. Please try again.");
     }
+    router.push("/goals")
   }
 
   return (
