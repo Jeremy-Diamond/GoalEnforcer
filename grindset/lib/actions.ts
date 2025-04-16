@@ -1,8 +1,12 @@
-"use server";
-import { currentUser } from "@clerk/nextjs/server";
-import { Goal } from "../models/Goal";
-import dbConnect from "./mongodb";
-import { scheduleEmailReminders } from "./utils";
+"use server"; // Indicates that this file contains server-side logic
+
+// Import necessary modules and utilities
+import { currentUser } from "@clerk/nextjs/server"; // Function to get the current authenticated user
+import { Goal } from "../models/Goal"; // Mongoose model for the `Goal` collection
+import dbConnect from "./mongodb"; // Utility to connect to the MongoDB database
+import { scheduleEmailReminders } from "./utils"; // Utility to schedule email reminders
+
+// Define the structure of the `GoalData` object for creating a goal
 interface GoalData {
   title: string;
   description?: string;
@@ -20,10 +24,10 @@ interface GoalData {
   userId: string;
 }
 
+// Function to create a new goal
 export async function createGoal(data: GoalData) {
   try {
-    //console.log('Data received in backend:', data); // Debugging line to check the data object
-    await dbConnect();
+    await dbConnect(); // Connect to the database
 
     // Validate required fields
     if (!data.title) {
@@ -36,7 +40,7 @@ export async function createGoal(data: GoalData) {
       throw new Error("Start Date and End Date are required.");
     }
 
-    // Convert startDate and endDate to Date objects if they are strings
+    // Convert `startDate` and `endDate` to Date objects if they are strings
     if (typeof data.startDate === "string") {
       data.startDate = new Date(data.startDate);
     }
@@ -48,8 +52,8 @@ export async function createGoal(data: GoalData) {
     if (typeof data.tasks === "string") {
       data.tasks = JSON.parse(data.tasks);
     }
-    //console.log('Tasks received in backend:', data.tasks); // Debugging line to check the tasks array
-    // Ensure tasks and dailyCompletion are plain objects
+
+    // Ensure tasks and dailyCompletion are properly formatted
     if (Array.isArray(data.tasks)) {
       data.tasks = data.tasks.map((task) => ({
         ...(typeof task === "object" && task !== null ? task : {}),
@@ -57,59 +61,58 @@ export async function createGoal(data: GoalData) {
         dailyCompletion: Array.isArray(task.dailyCompletion)
           ? task.dailyCompletion.map((completion) => ({
               ...completion,
-              // Removed dayCount as it does not exist on the type
-              dueDate: new Date(completion.dueDate), // Ensure dueDate is a Date object
+              dueDate: new Date(completion.dueDate), // Ensure `dueDate` is a Date object
             }))
           : [],
       }));
     }
 
-    // Create the goal
+    // Create the goal in the database
     const result = await Goal.create(data);
-    console.log(data);
+
+    // If email reminders are enabled, schedule them
     if (data.receiveEmailReminders) {
-      const user = await currentUser();
+      const user = await currentUser(); // Get the current user
       if (!user) {
         throw new Error("User not found");
       } else {
-        await scheduleEmailReminders(user, result);
+        await scheduleEmailReminders(user, result); // Schedule email reminders
       }
     }
-    return result.acknowledged;
+
+    return result.acknowledged; // Return the result of the operation
   } catch (error) {
     console.error("An error occurred while creating a goal", error);
-    throw error;
+    throw error; // Rethrow the error for further handling
   }
 }
 
+// Function to retrieve all goals for the current user
 export async function getCurrentUserGoals() {
-  const user = await currentUser();
-  //console.log("Current User:", user);
+  const user = await currentUser(); // Get the current authenticated user
   try {
-    await dbConnect();
-    const goals = await Goal.find({ userId: user?.id }).exec();
-    return goals;
+    await dbConnect(); // Connect to the database
+    const goals = await Goal.find({ userId: user?.id }).exec(); // Find goals by user ID
+    return goals; // Return the list of goals
   } catch (error) {
     console.error("An error occurred while getting all goals", error);
-    return [];
+    return []; // Return an empty array in case of an error
   }
 }
 
-// get goal by id
-
+// Function to retrieve a goal by its ID
 export async function getGoalById(id: string) {
   try {
-    await dbConnect();
-    const goal = await Goal.findById(id).exec();
-    return goal;
+    await dbConnect(); // Connect to the database
+    const goal = await Goal.findById(id).exec(); // Find the goal by its ID
+    return goal; // Return the goal
   } catch (error) {
     console.error("An error occurred while getting the goal", error);
-    return null;
+    return null; // Return `null` in case of an error
   }
 }
 
-// update goal by id
-
+// Define the structure of the `GoalUpdateData` object for updating a goal
 interface GoalUpdateData {
   title?: string;
   description?: string;
@@ -118,35 +121,37 @@ interface GoalUpdateData {
   dueDate?: Date;
 }
 
+// Function to update a goal by its ID
 export async function updateGoalById(id: string, data: GoalUpdateData) {
   try {
-    await dbConnect();
+    await dbConnect(); // Connect to the database
 
     // Parse the `tasks` field if it exists and is a string
     if (typeof data.tasks === "string") {
       data.tasks = JSON.parse(data.tasks);
     }
 
-    const result = await Goal.updateOne({ _id: id }, { $set: data });
-    return result.acknowledged;
+    const result = await Goal.updateOne({ _id: id }, { $set: data }); // Update the goal
+    return result.acknowledged; // Return the result of the operation
   } catch (error) {
     console.error("An error occurred while updating the goal", error);
-    throw error;
+    throw error; // Rethrow the error for further handling
   }
 }
 
-// delete goal by id
+// Function to delete a goal by its ID
 export async function deleteGoalById(id: string) {
   try {
-    await dbConnect();
-    const result = await Goal.deleteOne({ _id: id });
-    return result.acknowledged;
+    await dbConnect(); // Connect to the database
+    const result = await Goal.deleteOne({ _id: id }); // Delete the goal
+    return result.acknowledged; // Return the result of the operation
   } catch (error) {
     console.error("An error occurred while deleting the goal", error);
-    return null;
+    return null; // Return `null` in case of an error
   }
 }
 
+// Define the structure of a task and its daily completion
 type Task = {
   _id: string;
   taskTitle: string;
@@ -160,49 +165,50 @@ type DailyCompletion = {
   completed: boolean;
 };
 
+// Function to retrieve the daily completion ID for a specific task and date
 export async function getDailyCompletionId(
   goalId: string,
   taskId: string,
   taskdate: Date
 ) {
-  //const taskdateDay = taskdate.getDate();
-  const taskdateDay = taskdate.toDateString();
+  const taskdateDay = taskdate.toDateString(); // Convert the date to a string
   try {
-    await dbConnect();
+    await dbConnect(); // Connect to the database
 
     const goal = await Goal.findOne({
       _id: goalId,
       "task._id": taskId,
-    });
+    }); // Find the goal and task
+
     if (!goal) {
-      console.error("goal or task not found");
-      return null;
+      console.error("Goal or task not found");
+      return null; // Return `null` if not found
     }
 
-    const task = goal.tasks.find((t: Task) => t._id.toString() === taskId);
+    const task = goal.tasks.find((t: Task) => t._id.toString() === taskId); // Find the task
 
     if (!task) {
-      console.error("task not found");
-      return null;
+      console.error("Task not found");
+      return null; // Return `null` if not found
     }
 
-    //const dailyCompletion = task.dailyCompletion.find((d:DailyCompletion) => d.dueDate.getDate() === taskdateDay);
     const dailyCompletion = task.dailyCompletion.find(
       (d: DailyCompletion) => d.dueDate.toDateString() === taskdateDay
-    );
+    ); // Find the daily completion record
 
     if (!dailyCompletion) {
       console.error("DailyCompletion not found for the date");
-      return null;
+      return null; // Return `null` if not found
     }
 
-    return dailyCompletion._id.toString();
+    return dailyCompletion._id.toString(); // Return the daily completion ID
   } catch (error) {
-    console.error("error finding dailycompletion:", error);
-    return null;
+    console.error("Error finding daily completion:", error);
+    return null; // Return `null` in case of an error
   }
 }
 
+// Function to update the daily completion status of a task
 export async function updateDaily(
   goalId: string,
   taskId: string,
@@ -210,7 +216,7 @@ export async function updateDaily(
   completed: boolean
 ) {
   try {
-    await dbConnect();
+    await dbConnect(); // Connect to the database
     const updateDaily = await Goal.findOneAndUpdate(
       {
         _id: goalId,
@@ -219,24 +225,23 @@ export async function updateDaily(
       },
       {
         $set: {
-          "tasks.$.dailyCompletion.$[elem].completed": completed,
+          "tasks.$.dailyCompletion.$[elem].completed": completed, // Update the completion status
         },
       },
       {
-        arrayFilters: [{ "elem._id": completedId }],
-        new: true,
+        arrayFilters: [{ "elem._id": completedId }], // Filter for the specific daily completion record
+        new: true, // Return the updated document
       }
     );
 
     if (!updateDaily) {
       console.error("Goal or task not found, or update failed");
-      return null;
+      return null; // Return `null` if the update failed
     }
 
-    //return updateDaily;
-    return { success: true };
+    return { success: true }; // Return success if the update was successful
   } catch (error) {
-    console.error("An error occured while retrieving the task", error);
-    throw error;
+    console.error("An error occurred while updating the task", error);
+    throw error; // Rethrow the error for further handling
   }
 }

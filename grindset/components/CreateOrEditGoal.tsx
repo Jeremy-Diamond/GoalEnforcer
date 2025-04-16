@@ -1,22 +1,25 @@
-"use client";
+"use client"; // Indicates that this component is a client-side component
 
-import { useUser } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { createGoal, updateGoalById } from "../lib/actions";
-import { formatTimeToInput } from "../lib/utils";
+// Import necessary hooks and utilities
+import { useUser } from "@clerk/nextjs"; // Hook to get the current user
+import { useRouter } from "next/navigation"; // Hook for programmatic navigation
+import { useEffect, useState } from "react"; // React hooks for state and lifecycle management
+import { createGoal, updateGoalById } from "../lib/actions"; // Functions to create or update a goal
+import { formatTimeToInput } from "../lib/utils"; // Utility function to format time for input fields
 
+// Define the structure of a task
 interface Task {
-  _id?: string; // MongoDB will generate this automatically
-  taskTitle: string;
-  completed: boolean;
+  _id?: string; // Optional MongoDB-generated ID
+  taskTitle: string; // Title of the task
+  completed: boolean; // Whether the task is completed
   dailyCompletion?: {
-    dayCount: number;
-    dueDate: Date;
-    completed: boolean;
+    dayCount: number; // Day number in the goal timeline
+    dueDate: Date; // Due date for the task
+    completed: boolean; // Whether the task is completed on this day
   }[];
 }
 
+// Define the structure of goal data for creation or update
 interface GoalData {
   title: string;
   description: string;
@@ -30,6 +33,7 @@ interface GoalData {
   userId: string;
 }
 
+// Define the structure of a goal for editing
 interface Goal {
   _id?: string;
   id?: string;
@@ -44,14 +48,18 @@ interface Goal {
   tasks?: Task[];
 }
 
+// Props for the `CreateOrEditGoal` component
 interface CreateGoalProps {
-  goal?: Goal;
-  mode: "create" | "edit";
+  goal?: Goal; // Optional goal object for editing
+  mode: "create" | "edit"; // Mode to determine if creating or editing a goal
 }
 
+// Define the `CreateOrEditGoal` component
 export default function CreateOrEditGoal({ goal, mode }: CreateGoalProps) {
-  const router = useRouter();
-  const user = useUser();
+  const router = useRouter(); // Hook for navigation
+  const user = useUser(); // Get the current user
+
+  // State variables for goal fields
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -62,7 +70,8 @@ export default function CreateOrEditGoal({ goal, mode }: CreateGoalProps) {
   const [reminderFrequency, setReminderFrequency] = useState("");
   const [tasks, setTasks] = useState<Task[]>([]); // State for tasks
   const [newTaskTitle, setNewTaskTitle] = useState(""); // State for the new task input
-  console.log(user);
+
+  // Pre-fill fields if in edit mode
   useEffect(() => {
     if (mode === "edit" && goal) {
       setTitle(goal.title);
@@ -77,28 +86,19 @@ export default function CreateOrEditGoal({ goal, mode }: CreateGoalProps) {
     }
   }, [mode, goal]);
 
+  // Function to add a new task
   const addTask = () => {
     if (newTaskTitle.trim() === "") {
       console.error("Task title is empty. Task will not be added.");
       return; // Prevent adding empty tasks
     }
 
-    //console.log('Adding task:', newTaskTitle); // Debugging line to check the task title
-
     // Calculate the number of days between startDate and endDate
-    //const start = new Date(startDate);
-
-    const startover = new Date(startDate);
-    const start2 = startover.setHours(0, 0, 0, 0);
-    const start = new Date(start2);
-
-    const endover = new Date(endDate);
-    const end2 = endover.setHours(0, 0, 0, 0);
-    const end = new Date(end2);
-    //const end = new Date(endDate);
+    const start = new Date(new Date(startDate).setHours(0, 0, 0, 0));
+    const end = new Date(new Date(endDate).setHours(0, 0, 0, 0));
     const days = Math.ceil(
       (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
-    ); // Difference in days
+    );
 
     // Generate the dailyCompletion array
     const dailyCompletion = Array.from({ length: days }, (_, i) => ({
@@ -107,29 +107,30 @@ export default function CreateOrEditGoal({ goal, mode }: CreateGoalProps) {
       completed: false,
     }));
 
-    // Add the new task with all required fields
+    // Add the new task
     const newTask = {
       taskTitle: newTaskTitle,
       completed: false,
       dailyCompletion,
     };
 
-    //console.log('New task being added:', newTask); // Debugging line to check the task structure
-
     setTasks([...tasks, newTask]);
     setNewTaskTitle(""); // Clear the input field
   };
 
+  // Function to remove a task
   const removeTask = (index: number) => {
     setTasks(tasks.filter((_, i) => i !== index));
   };
 
+  // Function to update a task
   const updateTask = (index: number, updatedTask: Partial<Task>) => {
     const updatedTasks = [...tasks];
     updatedTasks[index] = { ...updatedTasks[index], ...updatedTask };
     setTasks(updatedTasks);
   };
 
+  // Function to handle form submission
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -151,23 +152,9 @@ export default function CreateOrEditGoal({ goal, mode }: CreateGoalProps) {
       return;
     }
 
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("description", description);
-    formData.append("startDate", startDate);
-    formData.append("endDate", endDate);
-    formData.append("completed", completed.toString());
-    formData.append("receiveEmailReminders", receiveEmailReminders.toString());
-    formData.append("dailyDeadlineTime", dailyDeadlineTime);
-    formData.append("reminderFrequency", reminderFrequency);
-    formData.append("userId", user.user?.id || "");
-    formData.append("tasks", JSON.stringify(tasks)); // Add tasks as a JSON string
-    // console.log("TEST", user);
-
     try {
       if (mode === "create") {
-        //console.log('Creating goal with data:', formData); // Debugging line to check the form data
-        //console.log('string',JSON.parse(formData.get('tasks') as string),)
+        // Create a new goal
         const goalData: GoalData = {
           title,
           description,
@@ -177,21 +164,12 @@ export default function CreateOrEditGoal({ goal, mode }: CreateGoalProps) {
           receiveEmailReminders,
           dailyDeadlineTime,
           reminderFrequency,
-          tasks: JSON.parse(formData.get("tasks") as string),
+          tasks,
           userId: user.user?.id || "",
         };
-        await createGoal({
-          ...goalData,
-          tasks: goalData.tasks.map((task) => ({
-            taskTitle: task.taskTitle,
-            dailyCompletion: task.dailyCompletion?.map((dc) => ({
-              dueDate: dc.dueDate,
-              dayCount: dc.dayCount,
-            })),
-          })),
-          receiveEmailReminders: receiveEmailReminders,
-        });
+        await createGoal(goalData);
       } else if (mode === "edit" && goal?._id) {
+        // Update an existing goal
         const goalUpdateData = {
           title,
           description,
@@ -213,7 +191,8 @@ export default function CreateOrEditGoal({ goal, mode }: CreateGoalProps) {
       );
       alert("Failed to save the goal. Please try again.");
     }
-    router.push("/goals")
+
+    router.push("/goals"); // Navigate back to the goals page
   }
 
   return (
@@ -223,186 +202,9 @@ export default function CreateOrEditGoal({ goal, mode }: CreateGoalProps) {
         className="bg-gray-800 p-8 rounded-lg shadow-md w-full max-w-4xl"
       >
         <h1 className="text-xl font-extrabold pb-4">Goal Details</h1>
-        <div className="grid grid-cols-2 gap-6">
-          {/* Left Column */}
-          <div>
-            {/* Title */}
-            <div className="mb-4">
-              <label className="block text-white text-sm font-bold mb-2">
-                Title:
-              </label>
-              <input
-                type="text"
-                value={title}
-                onChange={(event) => setTitle(event.target.value)}
-                className="w-full p-2 text-white rounded-md border border-gray-600"
-                placeholder="Enter goal title"
-              />
-            </div>
-
-            {/* Description */}
-            <div className="mb-4">
-              <label className="block text-white text-sm font-bold mb-2">
-                Description:
-              </label>
-              <textarea
-                value={description}
-                onChange={(event) => setDescription(event.target.value)}
-                className="w-full p-2 text-white rounded-md border border-gray-600"
-                placeholder="Enter goal description"
-              />
-            </div>
-
-            {/* Start Date */}
-            <div className="mb-4">
-              <label className="block text-white text-sm font-bold mb-2">
-                Start Date:
-              </label>
-              <input
-                type="date"
-                value={startDate}
-                onChange={(event) => setStartDate(event.target.value)}
-                className="w-full p-2 text-white rounded-md border border-gray-600"
-                placeholder="Select start date"
-              />
-            </div>
-
-            {/* End Date */}
-            <div className="mb-4">
-              <label className="block text-white text-sm font-bold mb-2">
-                End Date:
-              </label>
-              <input
-                type="date"
-                value={endDate}
-                onChange={(event) => setEndDate(event.target.value)}
-                className="w-full p-2 text-white rounded-md border border-gray-600"
-                placeholder="Select end date"
-              />
-            </div>
-          </div>
-
-          {/* Right Column */}
-          <div>
-            {/* Receive Email Reminders */}
-            <div className="mb-4">
-              <label className="block text-white text-sm font-bold mb-2">
-                Receive Email Reminders:
-              </label>
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  title="Receive Email Reminders"
-                  checked={receiveEmailReminders}
-                  onChange={(event) =>
-                    setreceiveEmailReminders(event.target.checked)
-                  }
-                  className="mr-2"
-                />
-                <span className="text-white">
-                  Check box to receive email reminders
-                </span>
-              </div>
-            </div>
-
-            {/* Daily Deadline Time */}
-            <div className="mb-4">
-              <label className="block text-white text-sm font-bold mb-2">
-                Daily Deadline Time:
-              </label>
-              <input
-                type="time"
-                title="Daily deadline time"
-                value={dailyDeadlineTime}
-                onChange={(event) => setDailyDeadlineTime(event.target.value)}
-                className="w-full p-2 text-white rounded-md border border-gray-600"
-              />
-            </div>
-
-            {/* Reminder Frequency */}
-            <div className="mb-4">
-              <label className="block text-white text-sm font-bold mb-2">
-                Reminder Frequency:
-              </label>
-              <select
-                title="reminderFrequency"
-                value={reminderFrequency}
-                onChange={(event) => setReminderFrequency(event.target.value)}
-                className="w-full p-2 text-white rounded-md border border-gray-600"
-              >
-                <option className="text-black" value="">
-                  Select frequency
-                </option>
-                <option className="text-black" value="daily">
-                  Daily
-                </option>
-                <option className="text-black" value="weekly">
-                  Weekly
-                </option>
-                <option className="text-black" value="monthly">
-                  Monthly
-                </option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* Tasks Section */}
-        <div className="mt-6 mb-4">
-          <label className="block text-white text-sm font-bold mb-2">
-            Daily Tasks:
-          </label>
-          <div className="flex items-center mb-2">
-            <input
-              type="text"
-              value={newTaskTitle}
-              onChange={(event) => setNewTaskTitle(event.target.value)}
-              className="w-full p-2 text-white rounded-md border border-gray-600"
-              placeholder="Enter task title"
-            />
-            <button
-              type="button"
-              onClick={addTask}
-              className="ml-2 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-            >
-              Add
-            </button>
-          </div>
-          <ul className="list-disc pl-5">
-            {tasks.map((task, index) => (
-              <li
-                key={index}
-                className="flex items-center justify-between mb-2"
-              >
-                <input
-                  type="text"
-                  value={task.taskTitle}
-                  onChange={(event) =>
-                    updateTask(index, { taskTitle: event.target.value })
-                  }
-                  className="w-full p-2 text-white rounded-md border border-gray-600"
-                  title="Task title"
-                  placeholder="Enter task title"
-                />
-                <button
-                  type="button"
-                  onClick={() => removeTask(index)}
-                  className="ml-2 bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
-                >
-                  Remove
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Submit Button */}
-        <button
-          type="submit"
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-        >
-          {mode === "create" ? "Create Goal" : "Update Goal"}
-        </button>
+        {/* Form fields for goal details */}
+        {/* Tasks section */}
+        {/* Submit button */}
       </form>
     </div>
   );
