@@ -1,98 +1,110 @@
-'use server';
-import { Goal}  from "../models/Goal";
+"use server";
+import { currentUser } from "@clerk/nextjs/server";
+import { Goal } from "../models/Goal";
 import dbConnect from "./mongodb";
-import { currentUser } from '@clerk/nextjs/server'
-
-  
-  interface GoalData {
-    title: string;
+import { scheduleEmailReminders } from "./utils";
+interface GoalData {
+  title: string;
+  description?: string;
+  tasks?: {
+    taskTitle: string;
     description?: string;
-    tasks?: { taskTitle: string; description?: string; dailyCompletion?: { dueDate: Date; dayCount: number;}[] }[];
-    startDate: string | Date;
-    endDate: string | Date;
-    completed: boolean;
-    allowCollaboration: boolean;
-    dailyDeadlineTime: string;
-    reminderFrequency: string;
-    userId: string;
-  }
-  
-  export async function createGoal(data: GoalData) {
-    try {
-      //console.log('Data received in backend:', data); // Debugging line to check the data object
-      await dbConnect();
-  
-      // Validate required fields
-      if (!data.title) {
-        throw new Error('Title is required.');
-      }
-      if (!data.userId) {
-        throw new Error('User ID is required.');
-      }
-      if (!data.startDate || !data.endDate) {
-        throw new Error('Start Date and End Date are required.');
-      }
-  
-      // Convert startDate and endDate to Date objects if they are strings
-      if (typeof data.startDate === 'string') {
-        data.startDate = new Date(data.startDate);
-      }
-      if (typeof data.endDate === 'string') {
-        data.endDate = new Date(data.endDate);
-      }
-  
-      // Parse tasks if they are passed as a string
-      if (typeof data.tasks === 'string') {
-        data.tasks = JSON.parse(data.tasks);
-      }
-      //console.log('Tasks received in backend:', data.tasks); // Debugging line to check the tasks array
-      // Ensure tasks and dailyCompletion are plain objects
-      if (Array.isArray(data.tasks)) {
-        data.tasks = data.tasks.map(task => ({
-          ...(typeof task === 'object' && task !== null ? task : {}),
-          taskTitle: task.taskTitle || 'Untitled Task', // Provide a default title if undefined
-          dailyCompletion: Array.isArray(task.dailyCompletion)
-            ? task.dailyCompletion.map(completion => ({
-                ...completion,
-                // Removed dayCount as it does not exist on the type
-                dueDate: new Date(completion.dueDate), // Ensure dueDate is a Date object
-              }))
-            : [],
-        }));
-      }
-  
-      // Create the goal
-      const result = await Goal.create(data);
-      return result.acknowledged;
-    } catch (error) {
-      console.error('An error occurred while creating a goal', error);
-      throw error;
+    dailyCompletion?: { dueDate: Date; dayCount: number }[];
+  }[];
+  startDate: string | Date;
+  endDate: string | Date;
+  completed: boolean;
+  receiveEmailReminders: boolean;
+  dailyDeadlineTime: string;
+  reminderFrequency: string;
+  userId: string;
+}
+
+export async function createGoal(data: GoalData) {
+  try {
+    //console.log('Data received in backend:', data); // Debugging line to check the data object
+    await dbConnect();
+
+    // Validate required fields
+    if (!data.title) {
+      throw new Error("Title is required.");
     }
+    if (!data.userId) {
+      throw new Error("User ID is required.");
+    }
+    if (!data.startDate || !data.endDate) {
+      throw new Error("Start Date and End Date are required.");
+    }
+
+    // Convert startDate and endDate to Date objects if they are strings
+    if (typeof data.startDate === "string") {
+      data.startDate = new Date(data.startDate);
+    }
+    if (typeof data.endDate === "string") {
+      data.endDate = new Date(data.endDate);
+    }
+
+    // Parse tasks if they are passed as a string
+    if (typeof data.tasks === "string") {
+      data.tasks = JSON.parse(data.tasks);
+    }
+    //console.log('Tasks received in backend:', data.tasks); // Debugging line to check the tasks array
+    // Ensure tasks and dailyCompletion are plain objects
+    if (Array.isArray(data.tasks)) {
+      data.tasks = data.tasks.map((task) => ({
+        ...(typeof task === "object" && task !== null ? task : {}),
+        taskTitle: task.taskTitle || "Untitled Task", // Provide a default title if undefined
+        dailyCompletion: Array.isArray(task.dailyCompletion)
+          ? task.dailyCompletion.map((completion) => ({
+              ...completion,
+              // Removed dayCount as it does not exist on the type
+              dueDate: new Date(completion.dueDate), // Ensure dueDate is a Date object
+            }))
+          : [],
+      }));
+    }
+
+    // Create the goal
+    const result = await Goal.create(data);
+    console.log(data);
+    if (data.receiveEmailReminders) {
+      const user = await currentUser();
+      if (!user) {
+        throw new Error("User not found");
+      } else {
+        await scheduleEmailReminders(user, result);
+      }
+    }
+    return result.acknowledged;
+  } catch (error) {
+    console.error("An error occurred while creating a goal", error);
+    throw error;
   }
+}
 
 export async function getCurrentUserGoals() {
-    const user = await currentUser();
-    //console.log("Current User:", user);
-    try {
-        await dbConnect();
-        const goals = await Goal.find({ userId: user?.id }).exec();
-        return goals;
-    } catch (error) {
-        console.error("An error occurred while getting all goals", error);
-        return [];
-    }
+  const user = await currentUser();
+  //console.log("Current User:", user);
+  try {
+    await dbConnect();
+    const goals = await Goal.find({ userId: user?.id }).exec();
+    return goals;
+  } catch (error) {
+    console.error("An error occurred while getting all goals", error);
+    return [];
+  }
 }
 
 // get goal by id
 
 export async function getGoalById(id: string) {
   try {
-      await dbConnect();
-      const goal = await Goal.findById(id).exec();
-      return goal;
+    await dbConnect();
+    const goal = await Goal.findById(id).exec();
+    return goal;
   } catch (error) {
-      console.error("An error occurred while getting the goal", error);
-      return null;
+    console.error("An error occurred while getting the goal", error);
+    return null;
   }
 }
 
@@ -111,28 +123,28 @@ export async function updateGoalById(id: string, data: GoalUpdateData) {
     await dbConnect();
 
     // Parse the `tasks` field if it exists and is a string
-    if (typeof data.tasks === 'string') {
+    if (typeof data.tasks === "string") {
       data.tasks = JSON.parse(data.tasks);
     }
 
     const result = await Goal.updateOne({ _id: id }, { $set: data });
     return result.acknowledged;
   } catch (error) {
-    console.error('An error occurred while updating the goal', error);
+    console.error("An error occurred while updating the goal", error);
     throw error;
   }
 }
 
 // delete goal by id
 export async function deleteGoalById(id: string) {
-    try {
-        await dbConnect();
-        const result = await Goal.deleteOne({ _id: id });
-        return result.acknowledged;
-    } catch (error) {
-        console.error("An error occurred while deleting the goal", error);
-        return null;
-    }
+  try {
+    await dbConnect();
+    const result = await Goal.deleteOne({ _id: id });
+    return result.acknowledged;
+  } catch (error) {
+    console.error("An error occurred while deleting the goal", error);
+    return null;
+  }
 }
 
 type Task = {
@@ -148,17 +160,19 @@ type DailyCompletion = {
   completed: boolean;
 };
 
-export async function getDailyCompletionId(goalId: string, taskId: string, taskdate: Date){
-  
+export async function getDailyCompletionId(
+  goalId: string,
+  taskId: string,
+  taskdate: Date
+) {
   //const taskdateDay = taskdate.getDate();
   const taskdateDay = taskdate.toDateString();
   try {
     await dbConnect();
 
     const goal = await Goal.findOne({
-      _id:goalId,
-      "task._id":taskId
-
+      _id: goalId,
+      "task._id": taskId,
     });
     if (!goal) {
       console.error("goal or task not found");
@@ -167,13 +181,15 @@ export async function getDailyCompletionId(goalId: string, taskId: string, taskd
 
     const task = goal.tasks.find((t: Task) => t._id.toString() === taskId);
 
-    if (!task){
+    if (!task) {
       console.error("task not found");
       return null;
     }
 
     //const dailyCompletion = task.dailyCompletion.find((d:DailyCompletion) => d.dueDate.getDate() === taskdateDay);
-    const dailyCompletion = task.dailyCompletion.find((d:DailyCompletion) => d.dueDate.toDateString() === taskdateDay);
+    const dailyCompletion = task.dailyCompletion.find(
+      (d: DailyCompletion) => d.dueDate.toDateString() === taskdateDay
+    );
 
     if (!dailyCompletion) {
       console.error("DailyCompletion not found for the date");
@@ -184,11 +200,15 @@ export async function getDailyCompletionId(goalId: string, taskId: string, taskd
   } catch (error) {
     console.error("error finding dailycompletion:", error);
     return null;
-}
+  }
 }
 
-
-export async function updateDaily(goalId: string, taskId: string, completedId: string, completed: boolean){
+export async function updateDaily(
+  goalId: string,
+  taskId: string,
+  completedId: string,
+  completed: boolean
+) {
   try {
     await dbConnect();
     const updateDaily = await Goal.findOneAndUpdate(
@@ -199,25 +219,24 @@ export async function updateDaily(goalId: string, taskId: string, completedId: s
       },
       {
         $set: {
-          "tasks.$.dailyCompletion.$[elem].completed": completed
-        }
+          "tasks.$.dailyCompletion.$[elem].completed": completed,
+        },
       },
       {
-        arrayFilters: [{"elem._id": completedId}],
-        new: true
+        arrayFilters: [{ "elem._id": completedId }],
+        new: true,
       }
     );
 
-    if (!updateDaily){
+    if (!updateDaily) {
       console.error("Goal or task not found, or update failed");
       return null;
     }
-    
+
     //return updateDaily;
-    return {success: true};
-  } catch (error){
-    console.error('An error occured while retrieving the task', error);
+    return { success: true };
+  } catch (error) {
+    console.error("An error occured while retrieving the task", error);
     throw error;
   }
 }
-

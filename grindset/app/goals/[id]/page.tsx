@@ -21,12 +21,11 @@ export default async function GoalPage({
   const goalId = resolvedParams.id; // Access the resolved `id`
   const goal = await getGoalById(goalId);
   goal.preferences = {
-    emailReminders: true,
-    allowCollaboration: goal.allowCollaboration,
+    receiveEmailReminders: goal.receiveEmailReminders,
     reminderFrequency: goal.reminderFrequency,
     deadlineTime: goal.deadlineTime,
   };
-
+  console.log(goal.preferences);
   return (
     <div className="flex min-h-screen flex-col">
       <main className="flex-1 p-4 md:p-6 lg:p-8">
