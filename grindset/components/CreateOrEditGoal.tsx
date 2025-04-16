@@ -98,12 +98,12 @@ export default function CreateOrEditGoal({ goal, mode }: CreateGoalProps) {
     //const end = new Date(endDate);
     const days = Math.ceil(
       (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
-    ); // Difference in days
-
+    ) + 1; // Difference in days
+    //console.log("days: " + days);
     // Generate the dailyCompletion array
     const dailyCompletion = Array.from({ length: days }, (_, i) => ({
       dayCount: i + 1,
-      dueDate: new Date(start.getTime() + i * (1000 * 60 * 60 * 24)), // Increment by 1 day
+      dueDate: new Date(start.getTime() + (i + 1) * (1000 * 60 * 60 * 24)), // Increment by 1 day
       completed: false,
     }));
 
