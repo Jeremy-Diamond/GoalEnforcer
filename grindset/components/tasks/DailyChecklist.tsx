@@ -32,12 +32,18 @@ export default async function DailyChecklist ({gid, ddate}:DailyChecklistProps) 
     const gtitle = goal.title || "Untitled Goal"; 
 
     const selectedDate = new Date(ddate);
+    //const selectedDateString = selectedDate.toDateString();
 
     const startDate = new Date(goal.startDate);
     const endDate = new Date(goal.endDate);
+    const endmod = endDate.setDate(endDate.getDate() + 1)
+    const endmodDate = new Date(endmod);
 
-    const indaRange = selectedDate >= startDate && selectedDate <= endDate;
-
+    const indaRange = selectedDate >= startDate && selectedDate <= endmodDate;
+    //console.log("start: " + startDate);
+    //console.log("end: " + endDate);
+    //console.log("selected: " + selectedDate);
+    //console.log(indaRange);
     if (indaRange) {
 
     return (

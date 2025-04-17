@@ -1,8 +1,10 @@
 'use client';
 
 import { updateDaily } from "@/app/lib/actions";
-import { useState, useTransition } from "react";
-import { useEffect } from "react";
+import {  useTransition } from "react";
+//import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+//useState,
 
 type ChecklistProps = {
     tTitle: string;
@@ -26,8 +28,9 @@ export default function Checklist ({
     //     // This effect runs whenever the selectedDate changes
     //     console.log("Selected Date changed:", selectedDate);
     //   }, [selectedDate]);
-
+    const router = useRouter();
     const [isPending, startTransition] = useTransition();
+
     const [isChecked, setIsChecked] = useState(checked);
 
       useEffect(() => {
@@ -35,12 +38,16 @@ export default function Checklist ({
       }, [checked]);
 
 
+
     const updateDatabase = (e: React.ChangeEvent<HTMLInputElement>) => {
         const isitChecked = e.target.checked;
         //console.log("ischecked type:", typeof isChecked);
         startTransition(() => {
-            updateDaily(goalId, taskId, dcId, isitChecked);
-            setIsChecked(!isChecked);
+            updateDaily(goalId, taskId, dcId, isitChecked).then(() => {
+                router.refresh();
+            })
+            //setIsChecked(isitChecked);
+            
         });
     };
 
@@ -55,7 +62,7 @@ export default function Checklist ({
                 title="updateDatabase"
                 type="checkbox"  
                 className="mr-4"
-                checked={isChecked} 
+                checked={checked} 
                 onChange={updateDatabase}
             />
             <div>{tTitle}</div>

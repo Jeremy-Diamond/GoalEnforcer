@@ -40,6 +40,7 @@ export default async function DContainer ({gdate }: DContainerProps) {
     let dateMessage = "";
     //console.log(gdate.toString());
     //console.log(viewthedate.toDateString());
+    //console.log(todayDate.toDateString());
     //console.log(viewthedate.getDay());
 
     if ( viewthedate.toDateString() === todayDate.toDateString()){
