@@ -1,57 +1,65 @@
-"use client";
+"use client"; // Indicates that this component is a client-side component
 
-import { useUser } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { createGoal, updateGoalById } from "../lib/actions";
-import { formatTimeToInput } from "../lib/utils";
+// Import necessary hooks and utilities
+import { useUser } from "@clerk/nextjs"; // Hook to get the current user
+import { useRouter } from "next/navigation"; // Hook for programmatic navigation
+import { useEffect, useState } from "react"; // React hooks for state and lifecycle management
+import { createGoal, updateGoalById } from "../lib/actions"; // Functions to create or update a goal
+import { formatTimeToInput } from "../lib/utils"; // Utility function to format time for input fields
 
+// Define the structure of a task
 interface Task {
-  _id?: string; // MongoDB will generate this automatically
-  taskTitle: string;
-  completed: boolean;
+  _id?: string; // Optional MongoDB-generated ID
+  taskTitle: string; // Title of the task
+  completed: boolean; // Indicates whether the task is completed
   dailyCompletion?: {
-    dayCount: number;
-    dueDate: Date;
-    completed: boolean;
-  }[];
+    dayCount: number; // Day number in the goal timeline
+    dueDate: Date; // Due date for the task
+    completed: boolean; // Indicates whether the task is completed on this day
+  }[]; // Array of daily completion records for the task
 }
 
+// Define the structure of goal data for creation or update
 interface GoalData {
-  title: string;
-  description: string;
-  startDate: string;
-  endDate: string;
-  completed: boolean;
-  receiveEmailReminders: boolean;
-  dailyDeadlineTime: string;
-  reminderFrequency: string;
-  tasks: Task[];
-  userId: string;
+  title: string; // Title of the goal
+  description: string; // Description of the goal
+  startDate: string; // Start date of the goal
+  endDate: string; // End date of the goal
+  completed: boolean; // Indicates whether the goal is completed
+  receiveEmailReminders: boolean; // Indicates whether email reminders are enabled
+  dailyDeadlineTime: string; // The daily deadline time for the goal
+  reminderFrequency: string; // Frequency of reminders (e.g., daily, weekly)
+  tasks: Task[]; // Array of tasks associated with the goal
+  userId: string; // ID of the user who owns the goal
 }
 
+// Define the structure of a goal for editing
 interface Goal {
-  _id?: string;
-  id?: string;
-  title: string;
-  description: string;
-  startDate?: string;
-  endDate?: string;
-  completed?: boolean;
-  receiveEmailReminders?: boolean;
-  dailyDeadlineTime?: string;
-  reminderFrequency?: string;
-  tasks?: Task[];
+  _id?: string; // Optional MongoDB-generated ID
+  id?: string; // Optional alternative ID
+  title: string; // Title of the goal
+  description: string; // Description of the goal
+  startDate?: string; // Optional start date
+  endDate?: string; // Optional end date
+  completed?: boolean; // Optional completion status
+  receiveEmailReminders?: boolean; // Optional email reminders flag
+  dailyDeadlineTime?: string; // Optional daily deadline time
+  reminderFrequency?: string; // Optional reminder frequency
+  tasks?: Task[]; // Optional array of tasks
 }
 
+// Props for the `CreateOrEditGoal` component
 interface CreateGoalProps {
-  goal?: Goal;
-  mode: "create" | "edit";
+  goal?: Goal; // Optional goal object for editing
+  mode: "create" | "edit"; // Mode to determine if creating or editing a goal
 }
 
+// Define the `CreateOrEditGoal` component
 export default function CreateOrEditGoal({ goal, mode }: CreateGoalProps) {
-  const router = useRouter();
-  const user = useUser();
+  const router = useRouter(); // Hook for navigation
+  const user = useUser(); // Get the current user
+
+  // State variables for goal fields
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -62,7 +70,8 @@ export default function CreateOrEditGoal({ goal, mode }: CreateGoalProps) {
   const [reminderFrequency, setReminderFrequency] = useState("");
   const [tasks, setTasks] = useState<Task[]>([]); // State for tasks
   const [newTaskTitle, setNewTaskTitle] = useState(""); // State for the new task input
-  console.log(user);
+
+  // Pre-fill fields if in edit mode
   useEffect(() => {
     if (mode === "edit" && goal) {
       setTitle(goal.title);
@@ -77,16 +86,12 @@ export default function CreateOrEditGoal({ goal, mode }: CreateGoalProps) {
     }
   }, [mode, goal]);
 
+  // Function to add a new task
   const addTask = () => {
     if (newTaskTitle.trim() === "") {
       console.error("Task title is empty. Task will not be added.");
       return; // Prevent adding empty tasks
     }
-
-    //console.log('Adding task:', newTaskTitle); // Debugging line to check the task title
-
-    // Calculate the number of days between startDate and endDate
-    //const start = new Date(startDate);
 
     const startover = new Date(startDate);
     const start2 = startover.setHours(0, 0, 0, 0);
@@ -95,7 +100,6 @@ export default function CreateOrEditGoal({ goal, mode }: CreateGoalProps) {
     const endover = new Date(endDate);
     const end2 = endover.setHours(0, 0, 0, 0);
     const end = new Date(end2);
-    //const end = new Date(endDate);
     const days = Math.ceil(
       (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
     ) + 1; // Difference in days
@@ -107,29 +111,30 @@ export default function CreateOrEditGoal({ goal, mode }: CreateGoalProps) {
       completed: false,
     }));
 
-    // Add the new task with all required fields
+    // Add the new task
     const newTask = {
       taskTitle: newTaskTitle,
       completed: false,
       dailyCompletion,
     };
 
-    //console.log('New task being added:', newTask); // Debugging line to check the task structure
-
     setTasks([...tasks, newTask]);
     setNewTaskTitle(""); // Clear the input field
   };
 
+  // Function to remove a task
   const removeTask = (index: number) => {
     setTasks(tasks.filter((_, i) => i !== index));
   };
 
+  // Function to update a task
   const updateTask = (index: number, updatedTask: Partial<Task>) => {
     const updatedTasks = [...tasks];
     updatedTasks[index] = { ...updatedTasks[index], ...updatedTask };
     setTasks(updatedTasks);
   };
 
+  // Function to handle form submission
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -166,8 +171,7 @@ export default function CreateOrEditGoal({ goal, mode }: CreateGoalProps) {
 
     try {
       if (mode === "create") {
-        //console.log('Creating goal with data:', formData); // Debugging line to check the form data
-        //console.log('string',JSON.parse(formData.get('tasks') as string),)
+        // Create a new goal
         const goalData: GoalData = {
           title,
           description,
@@ -192,6 +196,7 @@ export default function CreateOrEditGoal({ goal, mode }: CreateGoalProps) {
           receiveEmailReminders: receiveEmailReminders,
         });
       } else if (mode === "edit" && goal?._id) {
+        // Update an existing goal
         const goalUpdateData = {
           title,
           description,
@@ -213,7 +218,8 @@ export default function CreateOrEditGoal({ goal, mode }: CreateGoalProps) {
       );
       alert("Failed to save the goal. Please try again.");
     }
-    router.push("/goals")
+
+    router.push("/goals"); // Navigate back to the goals page
   }
 
   return (

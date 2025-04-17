@@ -13,17 +13,17 @@ interface DailyCompletion {
     completed: boolean;
     dueDate: Date;
   }
-  
+
   interface Task {
     _id: string;
     taskTitle: string;
     dailyCompletion: DailyCompletion[];
   }
-  
+
 
 
 export default async function DailyChecklist ({gid, ddate}:DailyChecklistProps) {
-    
+
     const goal = await getGoalById(gid);
     if (!goal){
         return <p>Goal not found.</p>
@@ -49,13 +49,13 @@ export default async function DailyChecklist ({gid, ddate}:DailyChecklistProps) 
     return (
         <div className="border border-1 rounded-md p-4">
             <h2 className=" text-2xl font-bold text-white text-center mb-4">{gtitle}</h2>
-    
+
             {tasklist.map((task: Task) => {
                 const dc = task.dailyCompletion.find((entry: DailyCompletion) => {
                     return new Date(entry.dueDate).toDateString() === selectedDate.toDateString()
                 }
             );
-    
+
             const dcId = dc?._id?.toString() ?? "";
             const isChecked = dc?.completed ?? false;
             const taskId = String(task._id);
@@ -76,4 +76,3 @@ export default async function DailyChecklist ({gid, ddate}:DailyChecklistProps) 
         </div>
       );
     }  
-}

@@ -23,22 +23,21 @@ export default function Checklist ({
     tTitle,
     //selectedDate
 }:ChecklistProps) {
-    
+
     // useEffect(() => {
     //     // This effect runs whenever the selectedDate changes
     //     console.log("Selected Date changed:", selectedDate);
     //   }, [selectedDate]);
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
-    //const [isChecked, setIsChecked] = useState(checked);
-    
-    //   useEffect(() => {
-    //     setIsChecked(checked);
-    //   }, [checked]);
-    // if (!dcId) {
-    //     console.warn("Skipping update: dcId is missing");
-    //     return;
-    //   }
+
+    const [isChecked, setIsChecked] = useState(checked);
+
+      useEffect(() => {
+        setIsChecked(checked);
+      }, [checked]);
+
+
 
     const updateDatabase = (e: React.ChangeEvent<HTMLInputElement>) => {
         const isitChecked = e.target.checked;
